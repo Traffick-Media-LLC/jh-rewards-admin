@@ -1,56 +1,35 @@
 import React, { useEffect, useState } from "react";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import type { Session, User } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { Shield, RefreshCw } from "lucide-react";
 
-// Lightweight SEO helper (keeps consistency with Shop page)
-function useSEO({ title, description, canonical }: { title: string; description: string; canonical?: string }) {
+
+const Auth: React.FC = () => {
+  const navigate = useNavigate();
+  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  // SEO
   useEffect(() => {
-    document.title = title;
-
+    document.title = "Admin Login | Juice Head Rewards";
+    
     let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
     if (!meta) {
       meta = document.createElement('meta');
       meta.name = 'description';
       document.head.appendChild(meta);
     }
-    meta.content = description;
-
-    let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
-    if (!link) {
-      link = document.createElement('link');
-      link.rel = 'canonical';
-      document.head.appendChild(link);
-    }
-    link.href = canonical || `${window.location.origin}/auth`;
-  }, [title, description, canonical]);
-}
-
-const Auth: React.FC = () => {
-  useSEO({
-    title: "Login | Juice Head Rewards",
-    description: "Login or register to access your Juice Head Rewards account and track points.",
-    canonical: `${window.location.origin}/auth`,
-  });
-
-  const navigate = useNavigate();
-
-  // Critical: maintain both session and user
-  const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<User | null>(null);
-
-  // Login form state
-  const [loginEmail, setLoginEmail] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(true);
-  const [loadingLogin, setLoadingLogin] = useState(false);
+    meta.content = "Admin login for Juice Head Rewards management system.";
+  }, []);
 
   // No longer need inline signup form state
 
@@ -69,26 +48,26 @@ const Auth: React.FC = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Redirect authenticated users away from auth page
+  // Redirect authenticated users
   useEffect(() => {
     if (session?.user) {
-      navigate("/", { replace: true });
+      navigate("/admin", { replace: true });
     }
   }, [session, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoadingLogin(true);
+    setLoading(true);
+    
     try {
       const { error } = await supabase.auth.signInWithPassword({
-        email: loginEmail,
-        password: loginPassword,
+        email,
+        password,
       });
+      
       if (error) throw error;
       toast.success("Logged in successfully");
-      // onAuthStateChange will redirect
     } catch (err: any) {
-      // Better error handling
       if (err?.message?.includes("Invalid login credentials")) {
         toast.error("Invalid email or password. Please check your credentials and try again.");
       } else if (err?.message?.includes("Email not confirmed")) {
@@ -97,17 +76,18 @@ const Auth: React.FC = () => {
         toast.error(err?.message ?? "Login failed");
       }
     } finally {
-      setLoadingLogin(false);
+      setLoading(false);
     }
   };
 
   const handleForgotPassword = async () => {
-    if (!loginEmail) {
+    if (!email) {
       toast.warning("Enter your email above first");
       return;
     }
+    
     try {
-      await supabase.auth.resetPasswordForEmail(loginEmail, {
+      await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth`,
       });
       toast.success("Password reset email sent");
@@ -116,91 +96,83 @@ const Auth: React.FC = () => {
     }
   };
 
-  const handleQuickSignUp = () => {
-    navigate("/onboarding");
-  };
-
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <header className="text-center mb-10">
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground">
-            WELCOME TO JUICE HEAD REWARDS
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <Shield className="h-16 w-16 mx-auto mb-4 text-primary" />
+          <h1 className="text-3xl font-bold text-foreground mb-2">
+            Admin Access
           </h1>
-          <p className="mt-2 text-muted-foreground">FLAVORS YOU LOVE, QUALITY YOU TRUST.</p>
-        </header>
+          <p className="text-muted-foreground">
+            Juice Head Rewards Administration
+          </p>
+        </div>
 
-        <section className="grid grid-cols-1 md:grid-cols-12 gap-10 items-start" aria-label="Authentication">
-          {/* Login column */}
-          <article className="md:col-span-6">
-            <h2 className="text-sm font-semibold text-foreground uppercase mb-3">Log In</h2>
+        <Card>
+          <CardHeader>
+            <CardTitle>Sign In</CardTitle>
+            <CardDescription>
+              Enter your admin credentials to access the dashboard
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="login-email">Email</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
-                  id="login-email"
+                  id="email"
                   type="email"
                   inputMode="email"
                   autoComplete="email"
-                  placeholder="you@example.com"
-                  value={loginEmail}
-                  onChange={(e) => setLoginEmail(e.target.value)}
+                  placeholder="admin@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </div>
+              
               <div className="space-y-2">
-                <Label htmlFor="login-password">Password</Label>
+                <Label htmlFor="password">Password</Label>
                 <Input
-                  id="login-password"
+                  id="password"
                   type="password"
                   autoComplete="current-password"
                   placeholder="••••••••"
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
                 />
               </div>
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Checkbox id="remember" checked={rememberMe} onCheckedChange={(v) => setRememberMe(Boolean(v))} />
-                  <Label htmlFor="remember" className="text-sm text-muted-foreground">Remember me</Label>
-                </div>
-                <button type="button" onClick={handleForgotPassword} className="text-sm text-primary underline-offset-4 hover:underline">
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  "Sign In"
+                )}
+              </Button>
+
+              <div className="text-center">
+                <button 
+                  type="button" 
+                  onClick={handleForgotPassword} 
+                  className="text-sm text-primary underline-offset-4 hover:underline"
+                >
                   Forgot Password?
                 </button>
               </div>
-
-              <Button type="submit" className="w-full" disabled={loadingLogin}>
-                {loadingLogin ? "Logging in..." : "Log In"}
-              </Button>
             </form>
-          </article>
+          </CardContent>
+        </Card>
 
-          {/* Divider on md+ */}
-          <div className="hidden md:block md:col-span-1 h-full w-px bg-border mx-auto" aria-hidden="true" />
-
-          {/* Register column */}
-          <article className="md:col-span-5 md:pl-6">
-            <h2 className="text-sm font-semibold text-foreground uppercase mb-3">New Customer?</h2>
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Join Juice Head Rewards to earn points with every purchase and unlock exclusive benefits.
-              </p>
-              <div className="space-y-3">
-                <Button onClick={handleQuickSignUp} className="w-full">
-                  Create Account
-                </Button>
-                <p className="text-xs text-muted-foreground text-center">
-                  Quick setup with full profile completion
-                </p>
-              </div>
-            </div>
-          </article>
-        </section>
-      </main>
-      <Footer />
+        <div className="mt-6 text-center text-sm text-muted-foreground">
+          <p>Admin-only access required</p>
+        </div>
+      </div>
     </div>
   );
 };
