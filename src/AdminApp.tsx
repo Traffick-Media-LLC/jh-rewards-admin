@@ -109,12 +109,12 @@ const AdminApp: React.FC = () => {
       }
 
       // Apply category filter
-      if (productCategoryFilter) {
+      if (productCategoryFilter && productCategoryFilter !== "all") {
         query = query.eq("category", productCategoryFilter);
       }
 
       // Apply status filter
-      if (productStatusFilter) {
+      if (productStatusFilter && productStatusFilter !== "all") {
         query = query.eq("active", productStatusFilter === "active");
       }
 
@@ -495,8 +495,8 @@ const AdminApp: React.FC = () => {
               onSortChange={setProductSortBy}
               onClearFilters={() => {
                 setProductSearchTerm("");
-                setProductCategoryFilter("");
-                setProductStatusFilter("");
+                setProductCategoryFilter("all");
+                setProductStatusFilter("all");
                 setProductSortBy("created_at_desc");
               }}
             />

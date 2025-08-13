@@ -28,7 +28,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
   onSortChange,
   onClearFilters
 }) => {
-  const hasActiveFilters = searchTerm || categoryFilter || statusFilter || sortBy !== "created_at_desc";
+  const hasActiveFilters = searchTerm || (categoryFilter && categoryFilter !== "all") || (statusFilter && statusFilter !== "all") || sortBy !== "created_at_desc";
 
   return (
     <div className="space-y-4">
@@ -48,7 +48,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
             <SelectValue placeholder="Category" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Categories</SelectItem>
+            <SelectItem value="all">All Categories</SelectItem>
             <SelectItem value="apparel">Apparel</SelectItem>
             <SelectItem value="accessories">Accessories</SelectItem>
             <SelectItem value="drinkware">Drinkware</SelectItem>
@@ -63,7 +63,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Status</SelectItem>
+            <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="active">Active</SelectItem>
             <SelectItem value="inactive">Inactive</SelectItem>
           </SelectContent>
@@ -100,16 +100,16 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
               <X className="h-3 w-3 ml-1 cursor-pointer" onClick={() => onSearchChange("")} />
             </Badge>
           )}
-          {categoryFilter && (
+          {categoryFilter && categoryFilter !== "all" && (
             <Badge variant="secondary">
               Category: {categoryFilter}
-              <X className="h-3 w-3 ml-1 cursor-pointer" onClick={() => onCategoryChange("")} />
+              <X className="h-3 w-3 ml-1 cursor-pointer" onClick={() => onCategoryChange("all")} />
             </Badge>
           )}
-          {statusFilter && (
+          {statusFilter && statusFilter !== "all" && (
             <Badge variant="secondary">
               Status: {statusFilter}
-              <X className="h-3 w-3 ml-1 cursor-pointer" onClick={() => onStatusChange("")} />
+              <X className="h-3 w-3 ml-1 cursor-pointer" onClick={() => onStatusChange("all")} />
             </Badge>
           )}
         </div>

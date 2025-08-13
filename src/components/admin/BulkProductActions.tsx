@@ -56,11 +56,11 @@ const BulkProductActions: React.FC<BulkProductActionsProps> = ({
         updates.price_cents = adjustment; // Simplified for demo
       }
 
-      if (category) {
+      if (category && category !== "keep") {
         updates.category = category;
       }
 
-      if (status) {
+      if (status && status !== "keep") {
         updates.active = status === "active";
       }
 
@@ -154,7 +154,7 @@ const BulkProductActions: React.FC<BulkProductActionsProps> = ({
                     <SelectValue placeholder="Keep current categories" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Keep current</SelectItem>
+                    <SelectItem value="keep">Keep current</SelectItem>
                     <SelectItem value="apparel">Apparel</SelectItem>
                     <SelectItem value="accessories">Accessories</SelectItem>
                     <SelectItem value="drinkware">Drinkware</SelectItem>
@@ -172,7 +172,7 @@ const BulkProductActions: React.FC<BulkProductActionsProps> = ({
                     <SelectValue placeholder="Keep current status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Keep current</SelectItem>
+                    <SelectItem value="keep">Keep current</SelectItem>
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="inactive">Inactive</SelectItem>
                   </SelectContent>
