@@ -2,6 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Users, Package, ShoppingCart, TrendingUp, Settings, Shield, FileText, Search, Filter, Download, UserPlus, Upload, RefreshCw } from "lucide-react";
+import ProductCreateDialog from "@/components/admin/ProductCreateDialog";
+import ProductEditDialog from "@/components/admin/ProductEditDialog";
+import ProductFilters from "@/components/admin/ProductFilters";
+import BulkProductActions from "@/components/admin/BulkProductActions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +29,13 @@ const AdminApp: React.FC = () => {
   const { isAdmin, isLoading: adminLoading } = useIsAdmin();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTab, setSelectedTab] = useState("dashboard");
+  
+  // Product management state
+  const [productSearchTerm, setProductSearchTerm] = useState("");
+  const [productCategoryFilter, setProductCategoryFilter] = useState("");
+  const [productStatusFilter, setProductStatusFilter] = useState("");
+  const [productSortBy, setProductSortBy] = useState("created_at_desc");
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
 
   // Redirect if not admin
   useEffect(() => {
@@ -86,14 +97,42 @@ const AdminApp: React.FC = () => {
     }
   });
 
-  // Products data
+  // Products data with filters
   const { data: products, refetch: refetchProducts } = useQuery({
-    queryKey: ["admin-products"],
+    queryKey: ["admin-products", productSearchTerm, productCategoryFilter, productStatusFilter, productSortBy],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .order("created_at", { ascending: false });
+      let query = supabase.from("products").select("*");
+
+      // Apply search filter
+      if (productSearchTerm) {
+        query = query.or(`name.ilike.%${productSearchTerm}%,sku.ilike.%${productSearchTerm}%`);
+      }
+
+      // Apply category filter
+      if (productCategoryFilter) {
+        query = query.eq("category", productCategoryFilter);
+      }
+
+      // Apply status filter
+      if (productStatusFilter) {
+        query = query.eq("active", productStatusFilter === "active");
+      }
+
+      // Apply sorting
+      const [sortField, sortDirection] = productSortBy.split("_");
+      const ascending = sortDirection === "asc";
+      
+      if (sortField === "price") {
+        query = query.order("price_cents", { ascending });
+      } else if (sortField === "inventory") {
+        query = query.order("inventory", { ascending });
+      } else if (sortField === "name") {
+        query = query.order("name", { ascending });
+      } else {
+        query = query.order("created_at", { ascending });
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     }
@@ -434,24 +473,67 @@ const AdminApp: React.FC = () => {
 
           {/* Products Tab */}
           <TabsContent value="products" className="space-y-6">
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold">Product Management</h2>
-              <Button onClick={() => refetchProducts()}>
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh
-              </Button>
+              <div className="flex gap-2">
+                <ProductCreateDialog />
+                <Button onClick={() => refetchProducts()}>
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Refresh
+                </Button>
+              </div>
             </div>
+
+            <ProductFilters
+              searchTerm={productSearchTerm}
+              onSearchChange={setProductSearchTerm}
+              categoryFilter={productCategoryFilter}
+              onCategoryChange={setProductCategoryFilter}
+              statusFilter={productStatusFilter}
+              onStatusChange={setProductStatusFilter}
+              sortBy={productSortBy}
+              onSortChange={setProductSortBy}
+              onClearFilters={() => {
+                setProductSearchTerm("");
+                setProductCategoryFilter("");
+                setProductStatusFilter("");
+                setProductSortBy("created_at_desc");
+              }}
+            />
+
+            {selectedProducts.length > 0 && (
+              <BulkProductActions
+                products={products || []}
+                selectedProducts={selectedProducts}
+                onSelectionChange={setSelectedProducts}
+              />
+            )}
 
             <Card>
               <CardHeader>
-                <CardTitle>Products</CardTitle>
-                <CardDescription>Manage product catalog</CardDescription>
+                <CardTitle>Products ({products?.length || 0})</CardTitle>
+                <CardDescription>Manage product catalog with full CRUD operations</CardDescription>
               </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-12">
+                        <input
+                          type="checkbox"
+                          checked={products?.length > 0 && selectedProducts.length === products.length}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedProducts(products?.map(p => p.id) || []);
+                            } else {
+                              setSelectedProducts([]);
+                            }
+                          }}
+                          className="rounded border-input"
+                        />
+                      </TableHead>
                       <TableHead>Name</TableHead>
+                      <TableHead>SKU</TableHead>
                       <TableHead>Price</TableHead>
                       <TableHead>Category</TableHead>
                       <TableHead>Status</TableHead>
@@ -462,17 +544,61 @@ const AdminApp: React.FC = () => {
                   <TableBody>
                     {products?.map((product) => (
                       <TableRow key={product.id}>
-                        <TableCell className="font-medium">{product.name}</TableCell>
-                        <TableCell>{formatPoints(product.price_cents)}</TableCell>
-                        <TableCell>{product.category}</TableCell>
+                        <TableCell>
+                          <input
+                            type="checkbox"
+                            checked={selectedProducts.includes(product.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedProducts([...selectedProducts, product.id]);
+                              } else {
+                                setSelectedProducts(selectedProducts.filter(id => id !== product.id));
+                              }
+                            }}
+                            className="rounded border-input"
+                          />
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          <div>
+                            {product.name}
+                            {product.homepage && (
+                              <Badge variant="outline" className="ml-2 text-xs">
+                                Featured
+                              </Badge>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {product.sku || "—"}
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            {formatPoints(product.price_cents)}
+                            {product.sale_price_cents && (
+                              <div className="text-xs text-muted-foreground line-through">
+                                {formatPoints(product.sale_price_cents)}
+                              </div>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">
+                            {product.category || "Uncategorized"}
+                          </Badge>
+                        </TableCell>
                         <TableCell>
                           <Badge variant={product.active ? "default" : "secondary"}>
                             {product.active ? "Active" : "Inactive"}
                           </Badge>
                         </TableCell>
-                        <TableCell>{product.inventory}</TableCell>
+                        <TableCell>
+                          <span className={product.inventory < 10 ? "text-destructive font-medium" : ""}>
+                            {product.inventory}
+                          </span>
+                        </TableCell>
                         <TableCell>
                           <div className="flex gap-2">
+                            <ProductEditDialog product={product} />
                             <Switch
                               checked={product.active}
                               onCheckedChange={(checked) => toggleProductStatus(product.id, checked)}
@@ -483,6 +609,14 @@ const AdminApp: React.FC = () => {
                     ))}
                   </TableBody>
                 </Table>
+                {products?.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    {productSearchTerm || productCategoryFilter || productStatusFilter
+                      ? "No products match your filters"
+                      : "No products found. Create your first product to get started."
+                    }
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
