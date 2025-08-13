@@ -1,0 +1,22 @@
+-- Insert new products from the provided list
+INSERT INTO public.products (name, sku, price_cents, inventory, category, active, currency) VALUES
+('Patagonia Backpack', 'PAT-GON-BPK', 400000, 100, 'houshold', true, 'USD'),
+('Make Flavors Great Again Hat', 'JHR-HAT-MAG', 100000, 100, 'Merch', true, 'USD'),
+('Samsung 4K TV 50"', 'SAM-SUN-TV5', 1320000, 100, 'Electronics', true, 'USD'),
+('Solo Stove', 'SOl-OST-OVE', 1400000, 100, 'sports & Outdoor', true, 'USD'),
+('Blackstone Tabletop Griddle', 'BST-TBL-TOP', 1400000, 100, 'houshold', true, 'USD'),
+('Nespresso Verturo Plus Deluxe', 'NES-PRES-VER', 680000, 100, 'houshold', true, 'USD'),
+('Dyson Airwrap', 'DYS-ONA-WRA', 2400000, 100, 'Electronics', true, 'USD'),
+('Blue Tees Range Finder', 'BLU-TEE-RFI', 800000, 100, 'Other', true, 'USD'),
+('Yeti Water Bottle', 'YET-WAT-BOT', 500000, 100, 'houshold', true, 'USD'),
+('Ninja Creami', 'NIN-JAC-REA', 1600000, 100, 'houshold', true, 'USD'),
+('Ninja Air Fryer', 'NIN-AIR-FRY', 360000, 100, 'houshold', true, 'USD'),
+('UE Boom 4 Speaker', 'UEB-OOM-4SP', 480000, 100, 'Electronics', true, 'USD'),
+('Bose Bluetooth Headphones', 'BOS-BLU-HEA', 1400000, 100, 'Electronics', true, 'USD'),
+('Keurig K-Express', 'KEU-RIG-EXP', 280000, 100, 'houshold', true, 'USD'),
+('Stanley 40 oz', 'STA-NLE-4OZ', 140000, 100, 'sports & Outdoor', true, 'USD'),
+('Yeti Tundra 35 Cooler', 'YET-ITU-COL', 1100000, 100, 'houshold', true, 'USD'),
+('Bellroy Venture Ready Pack', 'BEL-VEN-BPK', 1000000, 100, 'houshold', true, 'USD'),
+('Amazon $20 Gift Card', 'AMZ-GIF-CAR', 80000, 100, 'Merch', true, 'USD'),
+('Chick-fil-a $20 Gift Card', 'CHI-FIL-A20', 80000, 100, 'Merch', true, 'USD'),
+('Visa $25 Gift Card', 'VIS-GIF-CAR', 100000, 100, 'Merch', true, 'USD');
