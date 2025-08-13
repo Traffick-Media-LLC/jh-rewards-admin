@@ -100,7 +100,7 @@ const Auth: React.FC = () => {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Shield className="h-16 w-16 mx-auto mb-4 text-primary" />
+          <img src="/lovable-uploads/8db6e10e-1ee0-4dd7-9f72-3f42caa05fde.png" alt="Juice Head Rewards Logo" className="h-16 w-16 mx-auto mb-4" />
           <h1 className="text-3xl font-bold text-foreground mb-2">
             Admin Access
           </h1>
