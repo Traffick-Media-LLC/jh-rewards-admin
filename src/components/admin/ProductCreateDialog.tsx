@@ -134,10 +134,10 @@ const ProductCreateDialog: React.FC = () => {
             </TabsContent>
 
             <TabsContent value="media" className="space-y-4">
-              <ProductImageUploader 
-                onImageUploaded={setImageUrl}
-                currentImageUrl={imageUrl}
-              />
+                <ProductImageUploader
+                  onImagesUploaded={(urls) => setImageUrl(urls[0] || "")}
+                  currentImages={imageUrl ? [imageUrl] : []}
+                />
             </TabsContent>
 
             <div className="flex gap-2 pt-4">

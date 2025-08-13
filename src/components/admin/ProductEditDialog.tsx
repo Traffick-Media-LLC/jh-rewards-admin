@@ -178,11 +178,11 @@ const ProductEditDialog: React.FC<ProductEditDialogProps> = ({ product }) => {
             </TabsContent>
 
             <TabsContent value="media" className="space-y-4">
-              <ProductImageUploader 
-                productId={product.id}
-                onImageUploaded={setImageUrl}
-                currentImageUrl={imageUrl}
-              />
+                <ProductImageUploader
+                  productId={product.id}
+                  onImagesUploaded={(urls) => setImageUrl(urls[0] || "")}
+                  currentImages={imageUrl ? [imageUrl] : []}
+                />
             </TabsContent>
 
             <TabsContent value="variants" className="space-y-4">
