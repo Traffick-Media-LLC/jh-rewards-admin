@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Search, Filter, X } from "lucide-react";
+import CategorySelect from "./CategorySelect";
 
 interface ProductFiltersProps {
   searchTerm: string;
@@ -43,20 +44,7 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
           />
         </div>
 
-        <Select value={categoryFilter} onValueChange={onCategoryChange}>
-          <SelectTrigger className="w-[150px]">
-            <SelectValue placeholder="Category" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
-            <SelectItem value="apparel">Apparel</SelectItem>
-            <SelectItem value="accessories">Accessories</SelectItem>
-            <SelectItem value="drinkware">Drinkware</SelectItem>
-            <SelectItem value="supplements">Supplements</SelectItem>
-            <SelectItem value="gift-cards">Gift Cards</SelectItem>
-            <SelectItem value="other">Other</SelectItem>
-          </SelectContent>
-        </Select>
+        <CategorySelect value={categoryFilter} onValueChange={onCategoryChange} />
 
         <Select value={statusFilter} onValueChange={onStatusChange}>
           <SelectTrigger className="w-[120px]">

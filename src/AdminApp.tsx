@@ -559,13 +559,26 @@ const AdminApp: React.FC = () => {
                           />
                         </TableCell>
                         <TableCell className="font-medium">
-                          <div>
-                            {product.name}
-                            {product.homepage && (
-                              <Badge variant="outline" className="ml-2 text-xs">
-                                Featured
-                              </Badge>
+                          <div className="flex items-center gap-3">
+                            {product.image_url ? (
+                              <img 
+                                src={product.image_url} 
+                                alt={product.name}
+                                className="w-10 h-10 object-cover rounded border"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 bg-muted rounded border flex items-center justify-center">
+                                <span className="text-xs text-muted-foreground">No Image</span>
+                              </div>
                             )}
+                            <div>
+                              {product.name}
+                              {product.homepage && (
+                                <Badge variant="outline" className="ml-2 text-xs">
+                                  Featured
+                                </Badge>
+                              )}
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell className="text-muted-foreground">
