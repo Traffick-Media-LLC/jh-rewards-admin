@@ -38,17 +38,17 @@ export function TopProductsChart({ data, isLoading }: TopProductsChartProps) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Top Products</CardTitle>
+    <Card className="h-full">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg">Top Products</CardTitle>
         <CardDescription>Best performing products by revenue</CardDescription>
       </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig} className="h-80">
+      <CardContent className="pt-0">
+        <ChartContainer config={chartConfig} className="h-72">
           <BarChart 
             data={data} 
             layout="horizontal"
-            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+            margin={{ top: 10, right: 10, left: 10, bottom: 0 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
             <XAxis 
@@ -56,13 +56,17 @@ export function TopProductsChart({ data, isLoading }: TopProductsChartProps) {
               stroke="hsl(var(--muted-foreground))"
               tick={{ fontSize: 12 }}
               tickFormatter={(value) => formatPoints(value)}
+              axisLine={false}
+              tickLine={false}
             />
             <YAxis 
               type="category"
               dataKey="name"
               stroke="hsl(var(--muted-foreground))"
               tick={{ fontSize: 12 }}
-              width={120}
+              width={80}
+              axisLine={false}
+              tickLine={false}
             />
             <ChartTooltip 
               content={<ChartTooltipContent 

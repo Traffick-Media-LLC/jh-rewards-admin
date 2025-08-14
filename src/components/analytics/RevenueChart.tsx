@@ -42,24 +42,29 @@ export function RevenueChart({ data, isLoading }: RevenueChartProps) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Revenue Trends</CardTitle>
+    <Card className="h-full">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg">Revenue Trends</CardTitle>
         <CardDescription>Daily revenue and order volume over time</CardDescription>
       </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig} className="h-80">
+      <CardContent className="pt-0">
+        <ChartContainer config={chartConfig} className="h-72">
           <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
             <XAxis 
               dataKey="date" 
               stroke="hsl(var(--muted-foreground))"
               tick={{ fontSize: 12 }}
+              axisLine={false}
+              tickLine={false}
             />
             <YAxis 
               stroke="hsl(var(--muted-foreground))"
               tick={{ fontSize: 12 }}
               tickFormatter={(value) => formatPoints(value)}
+              axisLine={false}
+              tickLine={false}
+              width={60}
             />
             <ChartTooltip 
               content={<ChartTooltipContent 
@@ -73,9 +78,9 @@ export function RevenueChart({ data, isLoading }: RevenueChartProps) {
               type="monotone"
               dataKey="revenue"
               stroke="var(--color-revenue)"
-              strokeWidth={3}
-              dot={{ fill: "var(--color-revenue)", strokeWidth: 2, r: 4 }}
-              activeDot={{ r: 6, stroke: "var(--color-revenue)", strokeWidth: 2 }}
+              strokeWidth={2}
+              dot={false}
+              activeDot={{ r: 4, stroke: "var(--color-revenue)", strokeWidth: 2 }}
             />
           </LineChart>
         </ChartContainer>

@@ -42,24 +42,29 @@ export function PointsActivityChart({ data, isLoading }: PointsActivityChartProp
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Points Activity</CardTitle>
+    <Card className="h-full">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg">Points Activity</CardTitle>
         <CardDescription>Daily comparison of points earned vs redeemed</CardDescription>
       </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig} className="h-80">
+      <CardContent className="pt-0">
+        <ChartContainer config={chartConfig} className="h-72">
           <BarChart data={data}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
             <XAxis 
               dataKey="date" 
               stroke="hsl(var(--muted-foreground))"
               tick={{ fontSize: 12 }}
+              axisLine={false}
+              tickLine={false}
             />
             <YAxis 
               stroke="hsl(var(--muted-foreground))"
               tick={{ fontSize: 12 }}
               tickFormatter={(value) => formatPoints(value)}
+              axisLine={false}
+              tickLine={false}
+              width={60}
             />
             <ChartTooltip 
               content={<ChartTooltipContent 

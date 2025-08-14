@@ -54,32 +54,32 @@ export function MetricCard({
 
   return (
     <Card className={cn("transition-all hover:shadow-md", className)}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           {title}
         </CardTitle>
         {icon && (
-          <div className="text-muted-foreground">
+          <div className="h-4 w-4 text-muted-foreground">
             {icon}
           </div>
         )}
       </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold text-foreground">
+      <CardContent className="pt-0">
+        <div className="text-xl sm:text-2xl font-bold text-foreground mb-2">
           {formatValue(value)}
         </div>
         {(change !== undefined || changeLabel) && (
-          <div className="flex items-center gap-1 mt-1">
-            <div className={cn("flex items-center gap-1 text-xs", getTrendColor())}>
-              {getTrendIcon()}
-              {change !== undefined && (
+          <div className="flex items-center justify-between text-xs">
+            {change !== undefined && (
+              <div className={cn("flex items-center gap-1", getTrendColor())}>
+                {getTrendIcon()}
                 <span>
                   {change > 0 ? "+" : ""}{change}%
                 </span>
-              )}
-            </div>
+              </div>
+            )}
             {changeLabel && (
-              <span className="text-xs text-muted-foreground">
+              <span className="text-muted-foreground">
                 {changeLabel}
               </span>
             )}

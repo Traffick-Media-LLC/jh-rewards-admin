@@ -61,20 +61,20 @@ export function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Header with Date Controls */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Analytics Dashboard</h1>
-          <p className="text-muted-foreground">Comprehensive business insights and performance metrics</p>
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="space-y-1">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Analytics Dashboard</h1>
+          <p className="text-sm md:text-base text-muted-foreground">Comprehensive business insights and performance metrics</p>
         </div>
         <DateRangePicker 
           date={dateRange} 
           onDateChange={setDateRange}
-          className="w-full md:w-auto"
+          className="w-full sm:w-auto"
         />
       </div>
 
       {/* Key Performance Indicators */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <MetricCard
           title="Total Revenue"
           value={formatPoints(metrics?.totalRevenue || 0)}
@@ -118,7 +118,7 @@ export function DashboardPage() {
       </div>
 
       {/* Main Charts Section */}
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-4 md:gap-6 grid-cols-1 lg:grid-cols-2">
         <RevenueChart 
           data={analyticsData?.revenueData || []} 
           isLoading={isLoading}
@@ -130,7 +130,7 @@ export function DashboardPage() {
       </div>
 
       {/* Secondary Charts Section */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
         <OrderStatusChart 
           data={analyticsData?.orderStatusData || []} 
           isLoading={isLoading}
@@ -139,16 +139,14 @@ export function DashboardPage() {
           data={analyticsData?.pointsActivityData || []} 
           isLoading={isLoading}
         />
-        <div className="lg:col-span-1">
-          <TopProductsChart 
-            data={analyticsData?.topProductsData || []} 
-            isLoading={isLoading}
-          />
-        </div>
+        <TopProductsChart 
+          data={analyticsData?.topProductsData || []} 
+          isLoading={isLoading}
+        />
       </div>
 
       {/* System Health & Alerts */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         <MetricCard
           title="Points Outstanding"
           value={formatPoints(metrics?.outstandingPoints || 0)}
@@ -163,16 +161,14 @@ export function DashboardPage() {
           changeLabel="Require attention"
           trend={metrics?.lowStockProducts ? "down" : "neutral"}
         />
-        <div className="flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-lg font-semibold text-muted-foreground mb-2">System Status</div>
-            <div className="space-y-2">
-              <Badge variant="default" className="w-full justify-center">Database: Healthy</Badge>
-              <Badge variant="default" className="w-full justify-center">Analytics: Active</Badge>
-              <Badge variant="default" className="w-full justify-center">Sync: Running</Badge>
-            </div>
-          </div>
-        </div>
+        <MetricCard
+          title="System Status"
+          value="Operational"
+          icon={<Activity className="h-4 w-4" />}
+          changeLabel="All systems running"
+          trend="neutral"
+          className="md:col-span-2 lg:col-span-1"
+        />
       </div>
     </div>
   );

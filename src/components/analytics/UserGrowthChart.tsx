@@ -41,13 +41,13 @@ export function UserGrowthChart({ data, isLoading }: UserGrowthChartProps) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>User Growth</CardTitle>
+    <Card className="h-full">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg">User Growth</CardTitle>
         <CardDescription>Total users and daily registrations over time</CardDescription>
       </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig} className="h-80">
+      <CardContent className="pt-0">
+        <ChartContainer config={chartConfig} className="h-72">
           <AreaChart data={data}>
             <defs>
               <linearGradient id="totalUsersGradient" x1="0" y1="0" x2="0" y2="1">
@@ -64,10 +64,15 @@ export function UserGrowthChart({ data, isLoading }: UserGrowthChartProps) {
               dataKey="date" 
               stroke="hsl(var(--muted-foreground))"
               tick={{ fontSize: 12 }}
+              axisLine={false}
+              tickLine={false}
             />
             <YAxis 
               stroke="hsl(var(--muted-foreground))"
               tick={{ fontSize: 12 }}
+              axisLine={false}
+              tickLine={false}
+              width={40}
             />
             <ChartTooltip content={<ChartTooltipContent />} />
             <Area
