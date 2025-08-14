@@ -6,7 +6,6 @@ import {
   ShoppingCart, 
   FileText, 
   Settings,
-  BarChart3,
   Home
 } from "lucide-react";
 import {
@@ -27,11 +26,6 @@ const navigationItems = [
     title: "Dashboard",
     url: "/admin",
     icon: Home,
-  },
-  {
-    title: "Analytics",
-    url: "/admin/analytics",
-    icon: BarChart3,
   },
   {
     title: "Users",
