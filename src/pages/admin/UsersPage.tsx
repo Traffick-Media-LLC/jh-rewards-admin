@@ -45,24 +45,46 @@ export function UsersPage() {
     description: string,
     onSuccess?: () => void
   ) => {
+    // Prevent double submission
+    if (submittingPoints[userId]) {
+      return;
+    }
+
     try {
       setSubmittingPoints((prev) => ({ ...prev, [userId]: true }));
-      const { error } = await supabase.from("points_transactions").insert({
+      
+      // Validate input
+      if (!points || points === 0) {
+        throw new Error("Points amount cannot be zero");
+      }
+      if (!description.trim()) {
+        throw new Error("Description is required");
+      }
+      if (Math.abs(points) > 50000) {
+        throw new Error("Points adjustment cannot exceed 50,000");
+      }
+
+      console.log(`Adjusting points for user ${userId}: ${points} points (${description})`);
+      
+      const { data, error } = await supabase.from("points_transactions").insert({
         user_id: userId,
         points,
         type: "adjustment",
-        description,
-      });
+        description: description.trim(),
+      }).select();
 
       if (error) throw error;
-      toast.success("Points adjusted successfully");
+      
+      console.log("Points adjustment transaction created:", data);
+      toast.success(`Points adjusted successfully: ${points > 0 ? '+' : ''}${points} points`);
       refetchUsers();
 
       // Close dialog and reset form on success
       setOpenDialogs((prev) => ({ ...prev, [userId]: false }));
       onSuccess?.();
     } catch (error: any) {
-      toast.error(error.message);
+      console.error("Points adjustment error:", error);
+      toast.error(error.message || "Failed to adjust points");
     } finally {
       setSubmittingPoints((prev) => ({ ...prev, [userId]: false }));
     }
