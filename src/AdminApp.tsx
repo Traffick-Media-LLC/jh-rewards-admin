@@ -196,21 +196,30 @@ const AdminApp: React.FC = () => {
       if (logsError) throw logsError;
       if (!logs || logs.length === 0) return [];
 
-      // Get unique admin user IDs
+      // Get unique admin and user IDs
       const adminIds = [...new Set(logs.map(log => log.admin_user_id))];
+      const userIds = [...new Set(logs.map(log => log.resource_id).filter(Boolean))];
       
-      // Fetch admin profiles
-      const { data: profiles, error: profilesError } = await supabase
-        .from("profiles")
-        .select("id, email, first_name, last_name")
-        .in("id", adminIds);
+      // Fetch admin and user profiles
+      const [adminResponse, userResponse] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("id, email, first_name, last_name")
+          .in("id", adminIds),
+        supabase
+          .from("profiles")
+          .select("id, email, first_name, last_name")
+          .in("id", userIds)
+      ]);
       
-      if (profilesError) throw profilesError;
+      if (adminResponse.error) throw adminResponse.error;
+      if (userResponse.error) throw userResponse.error;
 
       // Combine the data
       return logs.map(log => ({
         ...log,
-        admin_profile: profiles?.find(profile => profile.id === log.admin_user_id)
+        admin_profile: adminResponse.data?.find(profile => profile.id === log.admin_user_id),
+        user_profile: userResponse.data?.find(profile => profile.id === log.resource_id)
       }));
     }
   });
@@ -757,8 +766,15 @@ const AdminApp: React.FC = () => {
                         <p className="mt-1 text-sm">Points Adjustment</p>
                       </div>
                       <div>
-                        <Label className="text-sm font-medium text-muted-foreground">User ID</Label>
-                        <p className="mt-1 text-sm font-mono">{selectedAuditLog.resource_id}</p>
+                        <Label className="text-sm font-medium text-muted-foreground">User Email</Label>
+                        <p className="mt-1 text-sm">
+                          {selectedAuditLog.user_profile?.email 
+                            ? `${selectedAuditLog.user_profile.first_name || ''} ${selectedAuditLog.user_profile.last_name || ''}`.trim() 
+                              ? `${selectedAuditLog.user_profile.first_name || ''} ${selectedAuditLog.user_profile.last_name || ''}`.trim() + ` (${selectedAuditLog.user_profile.email})`
+                              : selectedAuditLog.user_profile.email
+                            : selectedAuditLog.resource_id
+                          }
+                        </p>
                       </div>
                     </div>
                     
