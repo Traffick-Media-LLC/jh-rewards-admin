@@ -45,6 +45,10 @@ const AdminApp: React.FC = () => {
   // Dialog state management
   const [openDialogs, setOpenDialogs] = useState<Record<string, boolean>>({});
   const [submittingPoints, setSubmittingPoints] = useState<Record<string, boolean>>({});
+  
+  // Audit log modal state
+  const [selectedAuditLog, setSelectedAuditLog] = useState<any>(null);
+  const [auditLogModalOpen, setAuditLogModalOpen] = useState(false);
 
   // Redirect if not admin
   useEffect(() => {
@@ -683,27 +687,95 @@ const AdminApp: React.FC = () => {
                       <TableHead>Admin</TableHead>
                       <TableHead>Action</TableHead>
                       <TableHead>Resource</TableHead>
-                      <TableHead>Details</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {auditLogs?.map(log => <TableRow key={log.id}>
+                    {auditLogs?.map(log => (
+                      <TableRow 
+                        key={log.id}
+                        className="cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => {
+                          setSelectedAuditLog(log);
+                          setAuditLogModalOpen(true);
+                        }}
+                      >
                         <TableCell>
                           {new Date(log.created_at).toLocaleString()}
                         </TableCell>
                         <TableCell>{log.admin_user_id.slice(0, 8)}...</TableCell>
-                        <TableCell>{log.action_type}</TableCell>
-                        <TableCell>{log.resource_type}</TableCell>
-                        <TableCell>
-                          <pre className="text-xs max-w-xs overflow-hidden">
-                            {JSON.stringify(log.details, null, 2)}
-                          </pre>
-                        </TableCell>
-                      </TableRow>)}
+                        <TableCell className="capitalize">{log.action_type.replace('_', ' ')}</TableCell>
+                        <TableCell className="capitalize">{log.resource_type.replace('_', ' ')}</TableCell>
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               </CardContent>
             </Card>
+
+            {/* Audit Log Details Modal */}
+            <Dialog open={auditLogModalOpen} onOpenChange={setAuditLogModalOpen}>
+              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Audit Log Details</DialogTitle>
+                  <DialogDescription>
+                    Complete information for this audit log entry
+                  </DialogDescription>
+                </DialogHeader>
+                
+                {selectedAuditLog && (
+                  <div className="space-y-6">
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div>
+                        <Label className="text-sm font-medium text-muted-foreground">Timestamp</Label>
+                        <p className="mt-1 text-sm">{new Date(selectedAuditLog.created_at).toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium text-muted-foreground">Admin User ID</Label>
+                        <p className="mt-1 text-sm font-mono">{selectedAuditLog.admin_user_id}</p>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium text-muted-foreground">Action Type</Label>
+                        <p className="mt-1 text-sm capitalize">{selectedAuditLog.action_type.replace('_', ' ')}</p>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium text-muted-foreground">Resource Type</Label>
+                        <p className="mt-1 text-sm capitalize">{selectedAuditLog.resource_type.replace('_', ' ')}</p>
+                      </div>
+                      {selectedAuditLog.resource_id && (
+                        <div>
+                          <Label className="text-sm font-medium text-muted-foreground">Resource ID</Label>
+                          <p className="mt-1 text-sm font-mono">{selectedAuditLog.resource_id}</p>
+                        </div>
+                      )}
+                      {selectedAuditLog.ip_address && (
+                        <div>
+                          <Label className="text-sm font-medium text-muted-foreground">IP Address</Label>
+                          <p className="mt-1 text-sm font-mono">{selectedAuditLog.ip_address}</p>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {selectedAuditLog.user_agent && (
+                      <div>
+                        <Label className="text-sm font-medium text-muted-foreground">User Agent</Label>
+                        <p className="mt-1 text-sm break-all">{selectedAuditLog.user_agent}</p>
+                      </div>
+                    )}
+                    
+                    {selectedAuditLog.details && Object.keys(selectedAuditLog.details).length > 0 && (
+                      <div>
+                        <Label className="text-sm font-medium text-muted-foreground">Details</Label>
+                        <div className="mt-2 rounded-md border bg-muted/30 p-4">
+                          <pre className="text-xs text-muted-foreground whitespace-pre-wrap overflow-x-auto">
+                            {JSON.stringify(selectedAuditLog.details, null, 2)}
+                          </pre>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </DialogContent>
+            </Dialog>
           </TabsContent>
 
           {/* Settings Tab */}
