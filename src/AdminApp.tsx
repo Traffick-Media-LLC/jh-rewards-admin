@@ -42,6 +42,10 @@ const AdminApp: React.FC = () => {
   const [productSortBy, setProductSortBy] = useState("created_at_desc");
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
 
+  // Dialog state management
+  const [openDialogs, setOpenDialogs] = useState<Record<string, boolean>>({});
+  const [submittingPoints, setSubmittingPoints] = useState<Record<string, boolean>>({});
+
   // Redirect if not admin
   useEffect(() => {
     if (!authLoading && !adminLoading && (!user || !isAdmin)) {
@@ -187,8 +191,9 @@ const AdminApp: React.FC = () => {
       return data;
     }
   });
-  const handlePointsAdjustment = async (userId: string, points: number, description: string) => {
+  const handlePointsAdjustment = async (userId: string, points: number, description: string, onSuccess?: () => void) => {
     try {
+      setSubmittingPoints(prev => ({ ...prev, [userId]: true }));
       const {
         error
       } = await supabase.from("points_transactions").insert({
@@ -200,8 +205,14 @@ const AdminApp: React.FC = () => {
       if (error) throw error;
       toast.success("Points adjusted successfully");
       refetchUsers();
+      
+      // Close dialog and reset form on success
+      setOpenDialogs(prev => ({ ...prev, [userId]: false }));
+      onSuccess?.();
     } catch (error: any) {
       toast.error(error.message);
+    } finally {
+      setSubmittingPoints(prev => ({ ...prev, [userId]: false }));
     }
   };
   const toggleProductStatus = async (productId: string, active: boolean) => {
@@ -428,7 +439,10 @@ const AdminApp: React.FC = () => {
                           {new Date(user.created_at).toLocaleDateString()}
                         </TableCell>
                         <TableCell>
-                          <Dialog>
+                          <Dialog 
+                            open={openDialogs[user.id] || false} 
+                            onOpenChange={(open) => setOpenDialogs(prev => ({ ...prev, [user.id]: open }))}
+                          >
                             <DialogTrigger asChild>
                               <Button variant="outline" size="sm">
                                 Adjust Points
@@ -446,18 +460,35 @@ const AdminApp: React.FC = () => {
                             const formData = new FormData(e.currentTarget);
                             const points = parseInt(formData.get("points") as string);
                             const description = formData.get("description") as string;
-                            handlePointsAdjustment(user.id, points, description);
+                            const form = e.currentTarget;
+                            handlePointsAdjustment(user.id, points, description, () => {
+                              // Reset form fields on success
+                              form.reset();
+                            });
                           }} className="space-y-4">
                                 <div>
                                   <Label htmlFor="points">Points (positive to add, negative to subtract)</Label>
-                                  <Input name="points" type="number" required />
+                                  <Input 
+                                    name="points" 
+                                    type="number" 
+                                    required 
+                                    disabled={submittingPoints[user.id]}
+                                  />
                                 </div>
                                 <div>
                                   <Label htmlFor="description">Description</Label>
-                                  <Textarea name="description" required />
+                                  <Textarea 
+                                    name="description" 
+                                    required 
+                                    disabled={submittingPoints[user.id]}
+                                  />
                                 </div>
-                                <Button type="submit" className="w-full">
-                                  Apply Adjustment
+                                <Button 
+                                  type="submit" 
+                                  className="w-full"
+                                  disabled={submittingPoints[user.id]}
+                                >
+                                  {submittingPoints[user.id] ? "Applying..." : "Apply Adjustment"}
                                 </Button>
                               </form>
                             </DialogContent>
