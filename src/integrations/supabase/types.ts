@@ -497,6 +497,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      reconcile_points_balance: {
+        Args: { target_user_id?: string }
+        Returns: {
+          difference: number
+          new_balance: number
+          old_balance: number
+          user_id: string
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
