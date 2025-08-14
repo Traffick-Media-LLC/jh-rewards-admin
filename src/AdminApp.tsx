@@ -179,20 +179,39 @@ const AdminApp: React.FC = () => {
     }
   });
 
-  // Audit logs
+  // Audit logs for points adjustments with admin email
   const {
     data: auditLogs
   } = useQuery({
     queryKey: ["admin-audit"],
     queryFn: async () => {
-      const {
-        data,
-        error
-      } = await supabase.from("admin_audit_log").select("*").order("created_at", {
-        ascending: false
-      }).limit(100);
-      if (error) throw error;
-      return data;
+      // First get the audit logs
+      const { data: logs, error: logsError } = await supabase
+        .from("admin_audit_log")
+        .select("*")
+        .eq("action_type", "points_adjustment")
+        .order("created_at", { ascending: false })
+        .limit(100);
+      
+      if (logsError) throw logsError;
+      if (!logs || logs.length === 0) return [];
+
+      // Get unique admin user IDs
+      const adminIds = [...new Set(logs.map(log => log.admin_user_id))];
+      
+      // Fetch admin profiles
+      const { data: profiles, error: profilesError } = await supabase
+        .from("profiles")
+        .select("id, email, first_name, last_name")
+        .in("id", adminIds);
+      
+      if (profilesError) throw profilesError;
+
+      // Combine the data
+      return logs.map(log => ({
+        ...log,
+        admin_profile: profiles?.find(profile => profile.id === log.admin_user_id)
+      }));
     }
   });
   const handlePointsAdjustment = async (userId: string, points: number, description: string, onSuccess?: () => void) => {
@@ -684,9 +703,8 @@ const AdminApp: React.FC = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Timestamp</TableHead>
-                      <TableHead>Admin</TableHead>
+                      <TableHead>Admin Email</TableHead>
                       <TableHead>Action</TableHead>
-                      <TableHead>Resource</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -702,9 +720,10 @@ const AdminApp: React.FC = () => {
                         <TableCell>
                           {new Date(log.created_at).toLocaleString()}
                         </TableCell>
-                        <TableCell>{log.admin_user_id.slice(0, 8)}...</TableCell>
-                        <TableCell className="capitalize">{log.action_type.replace('_', ' ')}</TableCell>
-                        <TableCell className="capitalize">{log.resource_type.replace('_', ' ')}</TableCell>
+                        <TableCell>
+                          {log.admin_profile?.email || `Admin (${log.admin_user_id.slice(0, 8)}...)`}
+                        </TableCell>
+                        <TableCell>Points Adjustment</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -730,45 +749,45 @@ const AdminApp: React.FC = () => {
                         <p className="mt-1 text-sm">{new Date(selectedAuditLog.created_at).toLocaleString()}</p>
                       </div>
                       <div>
-                        <Label className="text-sm font-medium text-muted-foreground">Admin User ID</Label>
-                        <p className="mt-1 text-sm font-mono">{selectedAuditLog.admin_user_id}</p>
+                        <Label className="text-sm font-medium text-muted-foreground">Admin Email</Label>
+                        <p className="mt-1 text-sm">{selectedAuditLog.admin_profile?.email || `Admin (${selectedAuditLog.admin_user_id})`}</p>
                       </div>
                       <div>
-                        <Label className="text-sm font-medium text-muted-foreground">Action Type</Label>
-                        <p className="mt-1 text-sm capitalize">{selectedAuditLog.action_type.replace('_', ' ')}</p>
+                        <Label className="text-sm font-medium text-muted-foreground">Action</Label>
+                        <p className="mt-1 text-sm">Points Adjustment</p>
                       </div>
                       <div>
-                        <Label className="text-sm font-medium text-muted-foreground">Resource Type</Label>
-                        <p className="mt-1 text-sm capitalize">{selectedAuditLog.resource_type.replace('_', ' ')}</p>
+                        <Label className="text-sm font-medium text-muted-foreground">User ID</Label>
+                        <p className="mt-1 text-sm font-mono">{selectedAuditLog.resource_id}</p>
                       </div>
-                      {selectedAuditLog.resource_id && (
-                        <div>
-                          <Label className="text-sm font-medium text-muted-foreground">Resource ID</Label>
-                          <p className="mt-1 text-sm font-mono">{selectedAuditLog.resource_id}</p>
-                        </div>
-                      )}
-                      {selectedAuditLog.ip_address && (
-                        <div>
-                          <Label className="text-sm font-medium text-muted-foreground">IP Address</Label>
-                          <p className="mt-1 text-sm font-mono">{selectedAuditLog.ip_address}</p>
-                        </div>
-                      )}
                     </div>
-                    
-                    {selectedAuditLog.user_agent && (
-                      <div>
-                        <Label className="text-sm font-medium text-muted-foreground">User Agent</Label>
-                        <p className="mt-1 text-sm break-all">{selectedAuditLog.user_agent}</p>
-                      </div>
-                    )}
                     
                     {selectedAuditLog.details && Object.keys(selectedAuditLog.details).length > 0 && (
                       <div>
-                        <Label className="text-sm font-medium text-muted-foreground">Details</Label>
+                        <Label className="text-sm font-medium text-muted-foreground">Adjustment Details</Label>
                         <div className="mt-2 rounded-md border bg-muted/30 p-4">
-                          <pre className="text-xs text-muted-foreground whitespace-pre-wrap overflow-x-auto">
-                            {JSON.stringify(selectedAuditLog.details, null, 2)}
-                          </pre>
+                          <div className="space-y-2">
+                            {selectedAuditLog.details.points_amount && (
+                              <div>
+                                <span className="text-sm font-medium">Points Amount: </span>
+                                <span className={`text-sm ${selectedAuditLog.details.points_amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                  {selectedAuditLog.details.points_amount > 0 ? '+' : ''}{selectedAuditLog.details.points_amount}
+                                </span>
+                              </div>
+                            )}
+                            {selectedAuditLog.details.description && (
+                              <div>
+                                <span className="text-sm font-medium">Description: </span>
+                                <span className="text-sm">{selectedAuditLog.details.description}</span>
+                              </div>
+                            )}
+                            {selectedAuditLog.details.transaction_id && (
+                              <div>
+                                <span className="text-sm font-medium">Transaction ID: </span>
+                                <span className="text-sm font-mono">{selectedAuditLog.details.transaction_id}</span>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
                     )}
