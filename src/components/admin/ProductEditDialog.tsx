@@ -46,18 +46,29 @@ const ProductEditDialog: React.FC<ProductEditDialogProps> = ({ product }) => {
     try {
       const formData = new FormData(e.currentTarget as HTMLFormElement);
       
+      // Ensure required fields have values, fallback to current product data
+      const name = formData.get("name") as string || product.name;
+      const description = formData.get("description") as string || product.description || "";
+      const sku = formData.get("sku") as string || product.sku || "";
+      
+      // Validate required fields
+      if (!name || name.trim() === "") {
+        toast.error("Product name is required");
+        return;
+      }
+      
       const { error } = await supabase
         .from("products")
         .update({
-          name: formData.get("name") as string,
-          description: formData.get("description") as string,
-          price_cents: parseInt(formData.get("price_cents") as string) || 0,
-          sale_price_cents: formData.get("sale_price_cents") ? parseInt(formData.get("sale_price_cents") as string) : null,
+          name: name.trim(),
+          description: description,
+          price_cents: parseInt(formData.get("price_cents") as string) || product.price_cents,
+          sale_price_cents: formData.get("sale_price_cents") ? parseInt(formData.get("sale_price_cents") as string) : product.sale_price_cents,
           category: category,
-          sku: formData.get("sku") as string,
-          inventory: parseInt(formData.get("inventory") as string) || 0,
-          active: formData.get("active") === "on",
-          homepage: formData.get("homepage") === "on",
+          sku: sku,
+          inventory: parseInt(formData.get("inventory") as string) || product.inventory,
+          active: formData.has("active") ? formData.get("active") === "on" : product.active,
+          homepage: formData.has("homepage") ? formData.get("homepage") === "on" : product.homepage,
           image_url: imageUrl,
           updated_at: new Date().toISOString()
         })
