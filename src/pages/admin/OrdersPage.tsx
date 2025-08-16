@@ -54,17 +54,17 @@ export function OrdersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Orders</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Orders</h1>
           <p className="text-muted-foreground">Track and manage customer orders</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline">
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Button variant="outline" className="w-full sm:w-auto">
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
-          <Button onClick={() => refetchOrders()}>
+          <Button onClick={() => refetchOrders()} className="w-full sm:w-auto">
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
@@ -79,64 +79,110 @@ export function OrdersPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Order ID</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Items</TableHead>
-                <TableHead>Total</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Fulfillment</TableHead>
-                <TableHead>Date</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {orders?.map((order) => (
-                <TableRow key={order.id}>
-                  <TableCell>
-                    <div className="font-mono text-sm">
-                      {order.shopify_order_name || order.id.slice(0, 8)}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{order.shipping_name}</div>
-                      <div className="text-sm text-muted-foreground">
+          {/* Mobile view: Card layout */}
+          <div className="block sm:hidden space-y-4">
+            {orders?.map((order) => (
+              <Card key={order.id} className="p-4">
+                <div className="space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-medium font-mono text-sm">
+                        {order.shopify_order_name || order.id.slice(0, 8)}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">{order.shipping_name}</p>
+                      <p className="text-xs text-muted-foreground">
                         {order.shipping_city}, {order.shipping_state}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-medium text-sm">
+                        {formatPoints(order.total_points)}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {new Date(order.created_at).toLocaleDateString()}
                       </div>
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm">
-                      {/* We'll need to add line items data structure */}
+                  </div>
+                  
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex gap-2 flex-wrap">
+                      <Badge variant={getStatusBadgeVariant(order.status)} className="text-xs">
+                        {order.status}
+                      </Badge>
+                      <Badge variant={getFulfillmentBadgeVariant(order.fulfillment_status)} className="text-xs">
+                        {order.fulfillment_status || "pending"}
+                      </Badge>
+                    </div>
+                    <div className="text-xs text-muted-foreground shrink-0">
                       {Array.isArray(order.items) ? `${order.items.length} items` : "1 item"}
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="font-medium">
-                      {formatPoints(order.total_points)}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={getStatusBadgeVariant(order.status)}>
-                      {order.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={getFulfillmentBadgeVariant(order.fulfillment_status)}>
-                      {order.fulfillment_status || "pending"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm">
-                      {new Date(order.created_at).toLocaleDateString()}
-                    </div>
-                  </TableCell>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+
+          {/* Desktop view: Table layout */}
+          <div className="hidden sm:block">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Order ID</TableHead>
+                  <TableHead>Customer</TableHead>
+                  <TableHead>Items</TableHead>
+                  <TableHead>Total</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Fulfillment</TableHead>
+                  <TableHead>Date</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {orders?.map((order) => (
+                  <TableRow key={order.id}>
+                    <TableCell>
+                      <div className="font-mono text-sm">
+                        {order.shopify_order_name || order.id.slice(0, 8)}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div>
+                        <div className="font-medium">{order.shipping_name}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {order.shipping_city}, {order.shipping_state}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm">
+                        {/* We'll need to add line items data structure */}
+                        {Array.isArray(order.items) ? `${order.items.length} items` : "1 item"}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="font-medium">
+                        {formatPoints(order.total_points)}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={getStatusBadgeVariant(order.status)}>
+                        {order.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={getFulfillmentBadgeVariant(order.fulfillment_status)}>
+                        {order.fulfillment_status || "pending"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm">
+                        {new Date(order.created_at).toLocaleDateString()}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>
