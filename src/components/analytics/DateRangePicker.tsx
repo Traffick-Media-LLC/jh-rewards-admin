@@ -35,12 +35,12 @@ export function DateRangePicker({ date, onDateChange, className }: DateRangePick
   return (
     <div className={cn("flex flex-col sm:flex-row gap-2 w-full sm:w-auto", className)}>
       <Select onValueChange={handlePresetSelect}>
-        <SelectTrigger className="w-full sm:w-36">
+        <SelectTrigger className="w-full sm:w-32 text-xs sm:text-sm">
           <SelectValue placeholder="Quick select" />
         </SelectTrigger>
         <SelectContent>
           {presetRanges.map((preset) => (
-            <SelectItem key={preset.value} value={preset.value}>
+            <SelectItem key={preset.value} value={preset.value} className="text-xs sm:text-sm">
               {preset.label}
             </SelectItem>
           ))}
@@ -53,22 +53,29 @@ export function DateRangePicker({ date, onDateChange, className }: DateRangePick
             id="date"
             variant="outline"
             className={cn(
-              "w-full sm:w-72 justify-start text-left font-normal",
+              "w-full sm:w-60 lg:w-72 justify-start text-left font-normal text-xs sm:text-sm",
               !date && "text-muted-foreground"
             )}
           >
-            <CalendarIcon className="mr-2 h-4 w-4" />
+            <CalendarIcon className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
             <span className="truncate">
               {date?.from ? (
                 date.to ? (
                   <>
-                    {format(date.from, "MMM dd")} - {format(date.to, "MMM dd, y")}
+                    <span className="hidden sm:inline">{format(date.from, "MMM dd")} - {format(date.to, "MMM dd, y")}</span>
+                    <span className="sm:hidden">{format(date.from, "MM/dd")} - {format(date.to, "MM/dd/yy")}</span>
                   </>
                 ) : (
-                  format(date.from, "LLL dd, y")
+                  <>
+                    <span className="hidden sm:inline">{format(date.from, "LLL dd, y")}</span>
+                    <span className="sm:hidden">{format(date.from, "MM/dd/yy")}</span>
+                  </>
                 )
               ) : (
-                "Pick a date range"
+                <>
+                  <span className="hidden sm:inline">Pick a date range</span>
+                  <span className="sm:hidden">Date range</span>
+                </>
               )}
             </span>
           </Button>
@@ -80,7 +87,7 @@ export function DateRangePicker({ date, onDateChange, className }: DateRangePick
             defaultMonth={date?.from}
             selected={date}
             onSelect={onDateChange}
-            numberOfMonths={2}
+            numberOfMonths={1}
             className="pointer-events-auto"
           />
         </PopoverContent>

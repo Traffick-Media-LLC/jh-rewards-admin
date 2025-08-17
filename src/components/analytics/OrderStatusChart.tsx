@@ -53,19 +53,19 @@ export function OrderStatusChart({ data, isLoading }: OrderStatusChartProps) {
 
   return (
     <Card className="h-full">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg">Order Status Distribution</CardTitle>
-        <CardDescription>Breakdown of orders by current status</CardDescription>
+      <CardHeader className="pb-2 sm:pb-3">
+        <CardTitle className="text-sm sm:text-lg">Order Status Distribution</CardTitle>
+        <CardDescription className="text-xs sm:text-sm">Breakdown of orders by current status</CardDescription>
       </CardHeader>
       <CardContent className="pt-0">
-        <ChartContainer config={chartConfig} className="h-72">
+        <ChartContainer config={chartConfig} className="h-48 sm:h-64 lg:h-72">
           <PieChart>
             <Pie
               data={data}
               cx="50%"
               cy="50%"
-              innerRadius={50}
-              outerRadius={100}
+              innerRadius={30}
+              outerRadius={70}
               paddingAngle={2}
               dataKey="count"
               nameKey="status"
@@ -84,8 +84,8 @@ export function OrderStatusChart({ data, isLoading }: OrderStatusChartProps) {
             />
             <Legend 
               verticalAlign="bottom" 
-              height={36}
-              formatter={(value) => <span className="text-xs">{value}</span>}
+              height={28}
+              formatter={(value) => <span className="text-[10px] sm:text-xs">{value}</span>}
               iconType="circle"
             />
           </PieChart>

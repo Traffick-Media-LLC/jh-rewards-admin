@@ -61,10 +61,10 @@ export function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Header with Date Controls */}
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-1">
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Analytics Dashboard</h1>
-          <p className="text-sm md:text-base text-muted-foreground">Comprehensive business insights and performance metrics</p>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">Analytics Dashboard</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground">Comprehensive business insights and performance metrics</p>
         </div>
         <DateRangePicker 
           date={dateRange} 
@@ -74,7 +74,7 @@ export function DashboardPage() {
       </div>
 
       {/* Key Performance Indicators */}
-      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      <div className="grid gap-2 sm:gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <MetricCard
           title="Total Revenue"
           value={formatPoints(metrics?.totalRevenue || 0)}
@@ -118,7 +118,7 @@ export function DashboardPage() {
       </div>
 
       {/* Main Charts Section */}
-      <div className="grid gap-4 md:gap-6 grid-cols-1 lg:grid-cols-2">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 lg:grid-cols-2">
         <RevenueChart 
           data={analyticsData?.revenueData || []} 
           isLoading={isLoading}
@@ -130,7 +130,7 @@ export function DashboardPage() {
       </div>
 
       {/* Secondary Charts Section */}
-      <div className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
         <OrderStatusChart 
           data={analyticsData?.orderStatusData || []} 
           isLoading={isLoading}
@@ -146,7 +146,7 @@ export function DashboardPage() {
       </div>
 
       {/* System Health & Alerts */}
-      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-2 sm:gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         <MetricCard
           title="Points Outstanding"
           value={formatPoints(metrics?.outstandingPoints || 0)}

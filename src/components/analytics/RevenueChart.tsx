@@ -43,28 +43,29 @@ export function RevenueChart({ data, isLoading }: RevenueChartProps) {
 
   return (
     <Card className="h-full">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg">Revenue Trends</CardTitle>
-        <CardDescription>Daily revenue and order volume over time</CardDescription>
+      <CardHeader className="pb-2 sm:pb-3">
+        <CardTitle className="text-sm sm:text-lg">Revenue Trends</CardTitle>
+        <CardDescription className="text-xs sm:text-sm">Daily revenue and order volume over time</CardDescription>
       </CardHeader>
       <CardContent className="pt-0">
-        <ChartContainer config={chartConfig} className="h-72">
+        <ChartContainer config={chartConfig} className="h-48 sm:h-64 lg:h-72">
           <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
             <XAxis 
               dataKey="date" 
               stroke="hsl(var(--muted-foreground))"
-              tick={{ fontSize: 12 }}
+              tick={{ fontSize: 10 }}
               axisLine={false}
               tickLine={false}
+              interval="preserveStartEnd"
             />
             <YAxis 
               stroke="hsl(var(--muted-foreground))"
-              tick={{ fontSize: 12 }}
+              tick={{ fontSize: 10 }}
               tickFormatter={(value) => formatPoints(value)}
               axisLine={false}
               tickLine={false}
-              width={60}
+              width={45}
             />
             <ChartTooltip 
               content={<ChartTooltipContent 

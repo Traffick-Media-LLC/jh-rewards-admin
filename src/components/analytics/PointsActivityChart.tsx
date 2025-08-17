@@ -54,17 +54,18 @@ export function PointsActivityChart({ data, isLoading }: PointsActivityChartProp
             <XAxis 
               dataKey="date" 
               stroke="hsl(var(--muted-foreground))"
-              tick={{ fontSize: 12 }}
+              tick={{ fontSize: 10 }}
               axisLine={false}
               tickLine={false}
+              interval="preserveStartEnd"
             />
             <YAxis 
               stroke="hsl(var(--muted-foreground))"
-              tick={{ fontSize: 12 }}
+              tick={{ fontSize: 10 }}
               tickFormatter={(value) => formatPoints(value)}
               axisLine={false}
               tickLine={false}
-              width={60}
+              width={45}
             />
             <ChartTooltip 
               content={<ChartTooltipContent 

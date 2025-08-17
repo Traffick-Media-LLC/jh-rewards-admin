@@ -39,12 +39,12 @@ export function TopProductsChart({ data, isLoading }: TopProductsChartProps) {
 
   return (
     <Card className="h-full">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg">Top Products</CardTitle>
-        <CardDescription>Best performing products by revenue</CardDescription>
+      <CardHeader className="pb-2 sm:pb-3">
+        <CardTitle className="text-sm sm:text-lg">Top Products</CardTitle>
+        <CardDescription className="text-xs sm:text-sm">Best performing products by revenue</CardDescription>
       </CardHeader>
       <CardContent className="pt-0">
-        <ChartContainer config={chartConfig} className="h-72">
+        <ChartContainer config={chartConfig} className="h-48 sm:h-64 lg:h-72">
           <BarChart 
             data={data} 
             layout="horizontal"
@@ -54,7 +54,7 @@ export function TopProductsChart({ data, isLoading }: TopProductsChartProps) {
             <XAxis 
               type="number"
               stroke="hsl(var(--muted-foreground))"
-              tick={{ fontSize: 12 }}
+              tick={{ fontSize: 10 }}
               tickFormatter={(value) => formatPoints(value)}
               axisLine={false}
               tickLine={false}
@@ -63,8 +63,8 @@ export function TopProductsChart({ data, isLoading }: TopProductsChartProps) {
               type="category"
               dataKey="name"
               stroke="hsl(var(--muted-foreground))"
-              tick={{ fontSize: 12 }}
-              width={80}
+              tick={{ fontSize: 9 }}
+              width={70}
               axisLine={false}
               tickLine={false}
             />
