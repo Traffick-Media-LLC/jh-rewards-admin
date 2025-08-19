@@ -49,7 +49,7 @@ serve(async (req) => {
     console.log(`Authenticating admin user: ${user.id}`);
 
     // Check if user has admin role using user-authenticated client
-    const { data: hasAdminRole, error: roleError } = await supabaseUser.rpc('has_role', 'admin');
+    const { data: hasAdminRole, error: roleError } = await supabaseUser.rpc('has_role', { _role: 'admin' });
     
     if (roleError) {
       console.error('Role check error:', roleError);
