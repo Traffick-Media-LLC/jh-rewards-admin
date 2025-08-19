@@ -89,7 +89,7 @@ export default function SettingsPage() {
     setSyncStatus("");
     
     try {
-      const { data, error } = await supabase.functions.invoke('klaviyo-sync', {
+      const { data, error } = await supabase.functions.invoke('admin-klaviyo-sync', {
         body: { action: 'test_connection' }
       });
 
@@ -117,13 +117,13 @@ export default function SettingsPage() {
     setSyncStatus("Syncing all profiles...");
     
     try {
-      const { data, error } = await supabase.functions.invoke('klaviyo-sync', {
+      const { data, error } = await supabase.functions.invoke('admin-klaviyo-sync', {
         body: { action: 'manual_sync_all' }
       });
 
       if (error) throw error;
 
-      setSyncStatus(`${data.message}. Errors: ${data.errors}`);
+      setSyncStatus(`${data.message}. Skipped: ${data.skippedProfiles || 0}, Errors: ${data.errors}`);
       toast({
         title: "Profiles Synced",
         description: data.message,
@@ -145,7 +145,7 @@ export default function SettingsPage() {
     setSyncStatus("Syncing recent orders...");
     
     try {
-      const { data, error } = await supabase.functions.invoke('klaviyo-sync', {
+      const { data, error } = await supabase.functions.invoke('admin-klaviyo-sync', {
         body: { action: 'sync_recent_orders' }
       });
 
