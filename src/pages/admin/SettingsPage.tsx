@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,18 +10,79 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Settings, Save, Database, Mail, Shield, User, Zap, CheckCircle, AlertCircle, RefreshCw } from "lucide-react";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Settings, Save, Database, Mail, Shield, User, Zap, CheckCircle, AlertCircle, RefreshCw, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import useProfile from "@/hooks/useProfile";
 import useIsAdmin from "@/hooks/useIsAdmin";
+import { useSystemSettings } from "@/hooks/useSystemSettings";
 import { supabase } from "@/integrations/supabase/client";
 
+// Form schemas
+const profileSchema = z.object({
+  first_name: z.string().min(1, "First name is required"),
+  last_name: z.string().min(1, "Last name is required"),
+  phone: z.string().optional(),
+});
+
+const systemConfigSchema = z.object({
+  site_name: z.string().min(1, "Site name is required"),
+  company_email: z.string().email("Invalid email address"),
+  site_url: z.string().url("Invalid URL"),
+  maintenance_mode: z.boolean(),
+});
+
 export default function SettingsPage() {
-  const { profile } = useProfile();
+  const { profile, refetch: refetchProfile } = useProfile();
   const { isAdmin } = useIsAdmin();
+  const { settings, isLoading: settingsLoading, updateMultipleSettings, isUpdating } = useSystemSettings();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [syncStatus, setSyncStatus] = useState<string>("");
+  const [profileSaving, setProfileSaving] = useState(false);
+
+  // Profile form
+  const profileForm = useForm<z.infer<typeof profileSchema>>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      first_name: profile?.first_name || "",
+      last_name: profile?.last_name || "",
+      phone: profile?.phone || "",
+    },
+  });
+
+  // System config form
+  const systemForm = useForm<z.infer<typeof systemConfigSchema>>({
+    resolver: zodResolver(systemConfigSchema),
+    defaultValues: {
+      site_name: settings?.site_name || "Juice Head Rewards",
+      company_email: settings?.company_email || "admin@juicehead.com",
+      site_url: settings?.site_url || "https://rewards.juicehead.com",
+      maintenance_mode: settings?.maintenance_mode === "true",
+    },
+  });
+
+  // Update form defaults when data loads
+  React.useEffect(() => {
+    if (profile) {
+      profileForm.reset({
+        first_name: profile.first_name || "",
+        last_name: profile.last_name || "",
+        phone: profile.phone || "",
+      });
+    }
+  }, [profile, profileForm]);
+
+  React.useEffect(() => {
+    if (settings) {
+      systemForm.reset({
+        site_name: settings.site_name || "Juice Head Rewards",
+        company_email: settings.company_email || "admin@juicehead.com",
+        site_url: settings.site_url || "https://rewards.juicehead.com",
+        maintenance_mode: settings.maintenance_mode === "true",
+      });
+    }
+  }, [settings, systemForm]);
 
   const handleTestConnection = async () => {
     setIsLoading(true);
@@ -104,6 +168,47 @@ export default function SettingsPage() {
     }
   };
 
+  // Profile save handler
+  const handleSaveProfile = async (data: z.infer<typeof profileSchema>) => {
+    setProfileSaving(true);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          first_name: data.first_name,
+          last_name: data.last_name,
+          phone: data.phone || null,
+        })
+        .eq("id", profile?.id);
+
+      if (error) throw error;
+
+      await refetchProfile();
+      toast({
+        title: "Profile Updated",
+        description: "Your profile has been saved successfully.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Save Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setProfileSaving(false);
+    }
+  };
+
+  // System config save handler
+  const handleSaveSystemConfig = (data: z.infer<typeof systemConfigSchema>) => {
+    updateMultipleSettings({
+      site_name: data.site_name,
+      company_email: data.company_email,
+      site_url: data.site_url,
+      maintenance_mode: data.maintenance_mode.toString(),
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -135,44 +240,72 @@ export default function SettingsPage() {
               )}
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="first-name">First Name</Label>
-                <Input 
-                  id="first-name" 
-                  defaultValue={profile?.first_name || ''} 
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="last-name">Last Name</Label>
-                <Input 
-                  id="last-name" 
-                  defaultValue={profile?.last_name || ''} 
-                />
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="admin-email">Email Address</Label>
-                <Input 
-                  id="admin-email" 
-                  type="email" 
-                  defaultValue={profile?.email || ''} 
-                  disabled 
-                  className="bg-muted"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="admin-phone">Phone Number</Label>
-                <Input 
-                  id="admin-phone" 
-                  type="tel" 
-                  defaultValue={profile?.phone || ''} 
-                  placeholder="Optional"
-                />
-              </div>
-            </div>
+            <Form {...profileForm}>
+              <form onSubmit={profileForm.handleSubmit(handleSaveProfile)} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={profileForm.control}
+                    name="first_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>First Name</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={profileForm.control}
+                    name="last_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Last Name</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="admin-email">Email Address</Label>
+                    <Input 
+                      id="admin-email" 
+                      type="email" 
+                      value={profile?.email || ''} 
+                      disabled 
+                      className="bg-muted"
+                    />
+                  </div>
+                  <FormField
+                    control={profileForm.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone Number</FormLabel>
+                        <FormControl>
+                          <Input {...field} type="tel" placeholder="Optional" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="flex justify-end pt-4 border-t">
+                  <Button type="submit" disabled={profileSaving}>
+                    {profileSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                    <Save className="h-4 w-4 mr-2" />
+                    Save Profile
+                  </Button>
+                </div>
+              </form>
+            </Form>
           </CardContent>
         </Card>
         {/* System Configuration */}
@@ -187,33 +320,84 @@ export default function SettingsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="site-name">Site Name</Label>
-                <Input id="site-name" defaultValue="Juice Head Rewards" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="company-email">Company Email</Label>
-                <Input id="company-email" type="email" defaultValue="admin@juicehead.com" />
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="site-url">Site URL</Label>
-              <Input id="site-url" defaultValue="https://rewards.juicehead.com" />
-            </div>
-            
-            <Separator />
-            
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label className="text-base">Maintenance Mode</Label>
-                <p className="text-sm text-muted-foreground">
-                  Enable maintenance mode to prevent user access
-                </p>
-              </div>
-              <Switch />
-            </div>
+            <Form {...systemForm}>
+              <form onSubmit={systemForm.handleSubmit(handleSaveSystemConfig)} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={systemForm.control}
+                    name="site_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Site Name</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={systemForm.control}
+                    name="company_email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Company Email</FormLabel>
+                        <FormControl>
+                          <Input {...field} type="email" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                <FormField
+                  control={systemForm.control}
+                  name="site_url"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Site URL</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <Separator />
+                
+                <FormField
+                  control={systemForm.control}
+                  name="maintenance_mode"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">Maintenance Mode</FormLabel>
+                        <p className="text-sm text-muted-foreground">
+                          Enable maintenance mode to prevent user access
+                        </p>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex justify-end pt-4 border-t">
+                  <Button type="submit" disabled={isUpdating || settingsLoading}>
+                    {isUpdating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                    <Save className="h-4 w-4 mr-2" />
+                    Save System Config
+                  </Button>
+                </div>
+              </form>
+            </Form>
           </CardContent>
         </Card>
 

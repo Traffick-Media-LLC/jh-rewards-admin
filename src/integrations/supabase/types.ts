@@ -104,6 +104,7 @@ export type Database = {
           total_points: number
           tracking_number: string | null
           tracking_url: string | null
+          updated_at: string | null
           user_id: string
         }
         Insert: {
@@ -126,6 +127,7 @@ export type Database = {
           total_points?: number
           tracking_number?: string | null
           tracking_url?: string | null
+          updated_at?: string | null
           user_id: string
         }
         Update: {
@@ -148,6 +150,7 @@ export type Database = {
           total_points?: number
           tracking_number?: string | null
           tracking_url?: string | null
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
@@ -231,6 +234,7 @@ export type Database = {
           inventory: number
           price_adjustment_cents: number
           product_id: string
+          shopify_variant_id: string | null
           sku_suffix: string | null
           updated_at: string
           variant_combination: Json
@@ -242,6 +246,7 @@ export type Database = {
           inventory?: number
           price_adjustment_cents?: number
           product_id: string
+          shopify_variant_id?: string | null
           sku_suffix?: string | null
           updated_at?: string
           variant_combination?: Json
@@ -253,6 +258,7 @@ export type Database = {
           inventory?: number
           price_adjustment_cents?: number
           product_id?: string
+          shopify_variant_id?: string | null
           sku_suffix?: string | null
           updated_at?: string
           variant_combination?: Json
@@ -423,6 +429,63 @@ export type Database = {
         }
         Relationships: []
       }
+      security_events: {
+        Row: {
+          created_at: string | null
+          details: Json | null
+          event_type: string
+          id: string
+          ip_address: unknown | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          details?: Json | null
+          event_type: string
+          id?: string
+          ip_address?: unknown | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          details?: Json | null
+          event_type?: string
+          id?: string
+          ip_address?: unknown | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      system_settings: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          key: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          key: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          key?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -484,6 +547,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      assign_admin_role: {
+        Args: { target_user_id: string }
+        Returns: undefined
+      }
       has_role: {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
         Returns: boolean
@@ -505,6 +572,10 @@ export type Database = {
           old_balance: number
           user_id: string
         }[]
+      }
+      sync_orders_job: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
     }
     Enums: {
