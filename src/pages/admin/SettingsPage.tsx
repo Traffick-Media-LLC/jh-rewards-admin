@@ -200,185 +200,62 @@ export function SettingsPage() {
               Klaviyo Integration
             </CardTitle>
             <CardDescription>
-              Configure Klaviyo marketing automation and customer sync settings
+              Real-time marketing automation sync for user profiles and events
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* API Configuration */}
-            <div className="space-y-4">
+            {/* Connection Status */}
+            <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
+              <CheckCircle className="h-4 w-4 text-success" />
+              <span className="text-sm font-medium">API Key Configured</span>
+              <Badge variant="outline" className="ml-auto text-xs">
+                Active
+              </Badge>
+            </div>
+            
+            <Separator />
+            
+            {/* Active Sync Events */}
+            <div className="space-y-3">
+              <h4 className="text-sm font-medium">Active Sync Events</h4>
+              <div className="text-xs text-muted-foreground mb-3">
+                These events are automatically synced to Klaviyo based on database triggers:
+              </div>
+              
               <div className="space-y-2">
-                <Label htmlFor="klaviyo-api-key">Klaviyo API Key</Label>
-                <div className="flex gap-2">
-                  <Input 
-                    id="klaviyo-api-key" 
-                    type="password" 
-                    placeholder="Enter your Klaviyo API key"
-                    className="font-mono text-sm"
-                  />
-                  <Button variant="outline" size="sm">
-                    <RefreshCw className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
-                <CheckCircle className="h-4 w-4 text-success" />
-                <span className="text-sm font-medium">Connected</span>
-                <Badge variant="outline" className="ml-auto text-xs">
-                  Last sync: 2 minutes ago
-                </Badge>
-              </div>
-            </div>
-            
-            <Separator />
-            
-            {/* Sync Settings */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Profile Sync</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Automatically sync user profiles to Klaviyo when updated
-                  </p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Code Redemption Events</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Track when users redeem reward codes
-                  </p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Order Events</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Sync order placement and fulfillment events
-                  </p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Marketing Email Opt-ins</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Sync marketing email preferences from user profiles
-                  </p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-            </div>
-            
-            <Separator />
-            
-            {/* Event Configuration */}
-            <div className="space-y-4">
-              <h4 className="text-sm font-medium">Event Configuration</h4>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="klaviyo-list-id">Default List ID</Label>
-                  <Input 
-                    id="klaviyo-list-id" 
-                    placeholder="Enter Klaviyo list ID"
-                    defaultValue="WzQxMjM"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="sync-frequency">Sync Frequency</Label>
-                  <Select defaultValue="realtime">
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select frequency" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="realtime">Real-time</SelectItem>
-                      <SelectItem value="hourly">Hourly</SelectItem>
-                      <SelectItem value="daily">Daily</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="space-y-0.5">
-                    <Label className="text-sm">Welcome Events</Label>
-                    <p className="text-xs text-muted-foreground">
-                      New user registrations
-                    </p>
+                <div className="flex items-center justify-between p-2 bg-muted/30 rounded">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-success" />
+                    <span className="text-sm">Profile Updates</span>
                   </div>
-                  <Switch defaultChecked />
+                  <Badge variant="secondary" className="text-xs">Auto</Badge>
                 </div>
                 
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="space-y-0.5">
-                    <Label className="text-sm">Points Earned</Label>
-                    <p className="text-xs text-muted-foreground">
-                      Code redemption events
-                    </p>
+                <div className="flex items-center justify-between p-2 bg-muted/30 rounded">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-success" />
+                    <span className="text-sm">Code Redemptions</span>
                   </div>
-                  <Switch defaultChecked />
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="space-y-0.5">
-                    <Label className="text-sm">Order Placed</Label>
-                    <p className="text-xs text-muted-foreground">
-                      Order creation events
-                    </p>
-                  </div>
-                  <Switch defaultChecked />
+                  <Badge variant="secondary" className="text-xs">Auto</Badge>
                 </div>
                 
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="space-y-0.5">
-                    <Label className="text-sm">Order Fulfilled</Label>
-                    <p className="text-xs text-muted-foreground">
-                      Order fulfillment events
-                    </p>
+                <div className="flex items-center justify-between p-2 bg-muted/30 rounded">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-success" />
+                    <span className="text-sm">Order Events</span>
                   </div>
-                  <Switch defaultChecked />
+                  <Badge variant="secondary" className="text-xs">Auto</Badge>
                 </div>
               </div>
             </div>
             
             <Separator />
             
-            {/* Sync Status */}
-            <div className="space-y-4">
-              <h4 className="text-sm font-medium">Sync Status & Logs</h4>
-              
-              <div className="grid grid-cols-3 gap-4">
-                <div className="p-3 border rounded-lg text-center">
-                  <div className="text-2xl font-bold text-primary">1,247</div>
-                  <div className="text-xs text-muted-foreground">Profiles Synced</div>
-                </div>
-                <div className="p-3 border rounded-lg text-center">
-                  <div className="text-2xl font-bold text-primary">89</div>
-                  <div className="text-xs text-muted-foreground">Events Today</div>
-                </div>
-                <div className="p-3 border rounded-lg text-center">
-                  <div className="text-2xl font-bold text-success">99.2%</div>
-                  <div className="text-xs text-muted-foreground">Success Rate</div>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <Button variant="outline" size="sm">
-                  View Sync Logs
-                </Button>
-                <Button variant="outline" size="sm">
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Test Connection
-                </Button>
+            {/* Sync Requirements */}
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium">Sync Requirements</h4>
+              <div className="text-xs text-muted-foreground">
+                Events sync only for users with marketing emails enabled in their profile settings.
               </div>
             </div>
           </CardContent>
