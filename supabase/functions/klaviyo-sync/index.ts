@@ -21,7 +21,7 @@ serve(async (req) => {
   try {
     const requestBody = await req.json();
     const { action, data } = requestBody;
-    console.log(`Klaviyo sync called - Action: ${action}, Data:`, JSON.stringify(data).substring(0, 200));
+    console.log(`Klaviyo sync called - Action: ${action}, Data:`, data ? JSON.stringify(data).substring(0, 200) : 'undefined');
 
     if (!klaviyoApiKey) {
       console.error('Klaviyo API key not configured');
