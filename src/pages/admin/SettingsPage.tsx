@@ -6,8 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Settings, Save, Database, Mail, Shield, Palette, User } from "lucide-react";
+import { Settings, Save, Database, Mail, Shield, User } from "lucide-react";
 import useProfile from "@/hooks/useProfile";
 import useIsAdmin from "@/hooks/useIsAdmin";
 
@@ -35,29 +34,16 @@ export function SettingsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center gap-4 pb-4">
-              <Avatar className="h-16 w-16">
-                <AvatarImage src="" alt="Profile" />
-                <AvatarFallback className="text-lg">
-                  {profile?.first_name?.[0]}{profile?.last_name?.[0]}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 space-y-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-medium">
-                    {profile?.first_name} {profile?.last_name}
-                  </h3>
-                  {isAdmin && (
-                    <Badge variant="secondary" className="text-xs">
-                      Admin
-                    </Badge>
-                  )}
-                </div>
-                <p className="text-sm text-muted-foreground">{profile?.email}</p>
-              </div>
+            <div className="flex items-center gap-2 pb-4">
+              <h3 className="text-lg font-medium">
+                {profile?.first_name} {profile?.last_name}
+              </h3>
+              {isAdmin && (
+                <Badge variant="secondary" className="text-xs">
+                  Admin
+                </Badge>
+              )}
             </div>
-            
-            <Separator />
             
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -96,56 +82,6 @@ export function SettingsPage() {
                   placeholder="Optional"
                 />
               </div>
-            </div>
-            
-            <Separator />
-            
-            <div className="space-y-4">
-              <h4 className="text-sm font-medium">Dashboard Preferences</h4>
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Dark Mode</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Use dark theme for the admin dashboard
-                  </p>
-                </div>
-                <Switch />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Email Notifications</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Receive notifications for important admin events
-                  </p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Analytics Auto-refresh</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Automatically refresh dashboard analytics
-                  </p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-            </div>
-            
-            <Separator />
-            
-            <div className="flex justify-between items-center">
-              <div>
-                <Label className="text-base">Password</Label>
-                <p className="text-sm text-muted-foreground">
-                  Last changed: Never
-                </p>
-              </div>
-              <Button variant="outline" size="sm">
-                Change Password
-              </Button>
             </div>
           </CardContent>
         </Card>
