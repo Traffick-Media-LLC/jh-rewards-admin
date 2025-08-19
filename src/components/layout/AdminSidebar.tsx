@@ -76,9 +76,11 @@ export function AdminSidebar() {
     <Sidebar className={collapsed ? "w-16" : "w-64"}>
       <SidebarHeader className="border-b border-sidebar-border">
         <div className="flex items-center gap-2 p-4">
-          <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
-            <TrendingUp className="h-4 w-4 text-primary-foreground" />
-          </div>
+          <img 
+            src="https://buiyewfwvnpuydzfforc.supabase.co/storage/v1/object/public/public-files/JH%20Rewards%20Logo.png" 
+            alt="Juice Head Logo" 
+            className="h-8 w-8 rounded-lg object-contain"
+          />
           {!collapsed && (
             <div>
               <h2 className="text-lg font-bold text-sidebar-foreground">
