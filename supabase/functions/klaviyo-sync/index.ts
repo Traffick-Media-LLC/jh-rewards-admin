@@ -19,10 +19,12 @@ serve(async (req) => {
   }
 
   try {
-    const { action, data } = await req.json();
-    console.log(`Klaviyo sync action: ${action}`);
+    const requestBody = await req.json();
+    const { action, data } = requestBody;
+    console.log(`Klaviyo sync called - Action: ${action}, Data:`, JSON.stringify(data).substring(0, 200));
 
     if (!klaviyoApiKey) {
+      console.error('Klaviyo API key not configured');
       throw new Error('Klaviyo API key not configured');
     }
 
@@ -42,14 +44,15 @@ serve(async (req) => {
       case 'sync_recent_orders':
         return await syncRecentOrders();
       default:
+        console.error(`Unknown action received: ${action}`);
         throw new Error(`Unknown action: ${action}`);
     }
   } catch (error) {
     console.error('Klaviyo sync error:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error.message, stack: error.stack }),
       { 
-        status: 500, 
+        status: 400, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     );
