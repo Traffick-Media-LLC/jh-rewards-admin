@@ -171,52 +171,6 @@ export function SettingsPage() {
           </CardContent>
         </Card>
 
-        {/* Database Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Database className="h-5 w-5" />
-              Database & Backup
-            </CardTitle>
-            <CardDescription>
-              Database maintenance and backup configuration
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label className="text-base">Auto Backup</Label>
-                <p className="text-sm text-muted-foreground">
-                  Automatically backup database daily
-                </p>
-              </div>
-              <Switch defaultChecked />
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label className="text-base">Data Retention</Label>
-                <p className="text-sm text-muted-foreground">
-                  Keep audit logs for 365 days
-                </p>
-              </div>
-              <Switch defaultChecked />
-            </div>
-            
-            <Separator />
-            
-            <div className="flex gap-2">
-              <Button variant="outline">
-                <Database className="h-4 w-4 mr-2" />
-                Backup Now
-              </Button>
-              <Button variant="outline">
-                <Database className="h-4 w-4 mr-2" />
-                Restore Backup
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
 
 
         {/* Save Settings */}
