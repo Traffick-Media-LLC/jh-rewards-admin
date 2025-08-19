@@ -11,7 +11,7 @@ import { UsersPage } from "./pages/admin/UsersPage";
 import { ProductsPage } from "./pages/admin/ProductsPage";
 import { OrdersPage } from "./pages/admin/OrdersPage";
 import { AuditLogsPage } from "./pages/admin/AuditLogsPage";
-import { SettingsPage } from "./pages/admin/SettingsPage";
+import SettingsPage from "./pages/admin/SettingsPage";
 import RequireAdmin from "./components/auth/RequireAdmin";
 
 const queryClient = new QueryClient();

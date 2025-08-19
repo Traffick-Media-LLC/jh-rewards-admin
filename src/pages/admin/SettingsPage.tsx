@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,12 +8,101 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Settings, Save, Database, Mail, Shield, User, Zap, CheckCircle, AlertCircle, RefreshCw } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import useProfile from "@/hooks/useProfile";
 import useIsAdmin from "@/hooks/useIsAdmin";
+import { supabase } from "@/integrations/supabase/client";
 
-export function SettingsPage() {
+export default function SettingsPage() {
   const { profile } = useProfile();
   const { isAdmin } = useIsAdmin();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<string>("");
+
+  const handleTestConnection = async () => {
+    setIsLoading(true);
+    setSyncStatus("");
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('klaviyo-sync', {
+        body: { action: 'test_connection' }
+      });
+
+      if (error) throw error;
+
+      setSyncStatus(data.message);
+      toast({
+        title: "Connection Test",
+        description: data.message,
+      });
+    } catch (error: any) {
+      setSyncStatus(`Error: ${error.message}`);
+      toast({
+        title: "Connection Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSyncAllProfiles = async () => {
+    setIsLoading(true);
+    setSyncStatus("Syncing all profiles...");
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('klaviyo-sync', {
+        body: { action: 'manual_sync_all' }
+      });
+
+      if (error) throw error;
+
+      setSyncStatus(`${data.message}. Errors: ${data.errors}`);
+      toast({
+        title: "Profiles Synced",
+        description: data.message,
+      });
+    } catch (error: any) {
+      setSyncStatus(`Error: ${error.message}`);
+      toast({
+        title: "Sync Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSyncRecentOrders = async () => {
+    setIsLoading(true);
+    setSyncStatus("Syncing recent orders...");
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('klaviyo-sync', {
+        body: { action: 'sync_recent_orders' }
+      });
+
+      if (error) throw error;
+
+      setSyncStatus(`${data.message}. Errors: ${data.errors}`);
+      toast({
+        title: "Orders Synced",
+        description: data.message,
+      });
+    } catch (error: any) {
+      setSyncStatus(`Error: ${error.message}`);
+      toast({
+        title: "Sync Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -250,6 +339,49 @@ export function SettingsPage() {
             </div>
             
             <Separator />
+            
+            {/* Manual Sync Section */}
+            <div className="space-y-3">
+              <h4 className="text-sm font-medium">Manual Sync</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleTestConnection}
+                  disabled={isLoading}
+                  className="flex items-center gap-2"
+                >
+                  <CheckCircle className="h-3 w-3" />
+                  Test Connection
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleSyncAllProfiles}
+                  disabled={isLoading}
+                  className="flex items-center gap-2"
+                >
+                  <RefreshCw className="h-3 w-3" />
+                  Sync All Profiles
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleSyncRecentOrders}
+                  disabled={isLoading}
+                  className="flex items-center gap-2"
+                >
+                  <Database className="h-3 w-3" />
+                  Sync Recent Orders
+                </Button>
+              </div>
+              
+              {syncStatus && (
+                <div className="mt-3 p-3 rounded-md bg-muted">
+                  <p className="text-sm">{syncStatus}</p>
+                </div>
+              )}
+            </div>
             
             {/* Sync Requirements */}
             <div className="space-y-2">
