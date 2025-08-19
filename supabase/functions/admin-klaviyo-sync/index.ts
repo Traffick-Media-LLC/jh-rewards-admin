@@ -10,8 +10,10 @@ const corsHeaders = {
 const klaviyoApiKey = Deno.env.get('KLAVIYO_API_KEY');
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
 
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+// Service role client for admin operations
+const supabaseServiceRole = createClient(supabaseUrl, supabaseServiceKey);
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -28,20 +30,38 @@ serve(async (req) => {
     // Extract the JWT token
     const token = authHeader.replace('Bearer ', '');
     
+    // Create user-authenticated client for role checking
+    const supabaseUser = createClient(supabaseUrl, supabaseAnonKey, {
+      global: {
+        headers: {
+          Authorization: authHeader
+        }
+      }
+    });
+    
     // Verify the user is authenticated and get user ID
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    const { data: { user }, error: authError } = await supabaseUser.auth.getUser(token);
     if (authError || !user) {
+      console.error('Authentication error:', authError);
       throw new Error('Invalid authentication token');
     }
 
-    // Check if user has admin role
-    const { data: hasAdminRole, error: roleError } = await supabase.rpc('has_role', { 
-      _role: 'admin' 
-    });
+    console.log(`Authenticating admin user: ${user.id}`);
+
+    // Check if user has admin role using user-authenticated client
+    const { data: hasAdminRole, error: roleError } = await supabaseUser.rpc('has_role', 'admin');
     
-    if (roleError || !hasAdminRole) {
+    if (roleError) {
+      console.error('Role check error:', roleError);
+      throw new Error(`Role check failed: ${roleError.message}`);
+    }
+    
+    if (!hasAdminRole) {
+      console.error(`User ${user.id} does not have admin role`);
       throw new Error('Admin privileges required');
     }
+
+    console.log(`Admin role confirmed for user: ${user.id}`);
 
     // Log the admin action
     console.log(`Admin Klaviyo sync called by user: ${user.id}`);
@@ -81,7 +101,7 @@ serve(async (req) => {
 
 async function logAdminAction(adminUserId: string, action: string, req: Request) {
   try {
-    await supabase.from('admin_audit_log').insert({
+    await supabaseServiceRole.from('admin_audit_log').insert({
       admin_user_id: adminUserId,
       action_type: action,
       resource_type: 'klaviyo_integration',
@@ -223,7 +243,7 @@ async function manualSyncAll(adminUserId: string) {
 
   try {
     // Get all profiles with marketing emails enabled
-    const { data: profiles, error: profilesError } = await supabase
+    const { data: profiles, error: profilesError } = await supabaseServiceRole
       .from('profiles')
       .select('*')
       .eq('marketing_emails', true);
@@ -294,7 +314,7 @@ async function syncRecentOrders(adminUserId: string) {
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    const { data: orders, error: ordersError } = await supabase
+    const { data: orders, error: ordersError } = await supabaseServiceRole
       .from('orders')
       .select(`
         *,
