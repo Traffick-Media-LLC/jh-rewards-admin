@@ -8,6 +8,10 @@ interface TopUser {
   userId: string;
   points: number;
   rank: number;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  displayName: string;
 }
 
 interface TopUsersTableProps {
@@ -72,10 +76,10 @@ export function TopUsersTable({ data, isLoading }: TopUsersTableProps) {
                 </div>
                 <div>
                   <div className="font-medium text-xs sm:text-sm">
-                    User {user.userId.slice(-8)}
+                    {user.displayName}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    Member ID
+                    {user.email || `User ${user.userId.slice(-8)}`}
                   </div>
                 </div>
               </div>

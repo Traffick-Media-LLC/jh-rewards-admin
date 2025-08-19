@@ -171,17 +171,24 @@ export const useRewardsAnalytics = ({ dateRange, refreshInterval = 30000 }: Rewa
 
       const outstandingPointsLiability = totalPointsEarned - totalPointsRedeemed;
 
-      // Top Users by Points (from current balances)
-      const topUsers = allProfilesRes.data
-        .filter(p => p.points_balance > 0)
-        .sort((a, b) => b.points_balance - a.points_balance)
-        .slice(0, 10)
-        .map(user => ({
+      // Top Users by Points (with profile details)
+      const { data: topUserProfiles } = await supabase
+        .from("profiles")
+        .select("id, points_balance, first_name, last_name, email")
+        .gt("points_balance", 0)
+        .order("points_balance", { ascending: false })
+        .limit(10);
+
+      const topUsers = (topUserProfiles || [])
+        .map((user, index) => ({
           userId: user.id,
           points: user.points_balance,
-          rank: 0 // Will be set by index + 1
-        }))
-        .map((user, index) => ({ ...user, rank: index + 1 }));
+          rank: index + 1,
+          firstName: user.first_name,
+          lastName: user.last_name,
+          email: user.email,
+          displayName: [user.first_name, user.last_name].filter(Boolean).join(' ') || 'Anonymous User'
+        }));
 
       // Most Redeemed Items (from orders)
       const itemFrequency: Record<string, { count: number; totalPoints: number }> = {};
