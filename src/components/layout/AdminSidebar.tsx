@@ -4,6 +4,7 @@ import {
   Users, 
   Package, 
   ShoppingCart, 
+  Ticket,
   FileText, 
   Settings,
   Home
@@ -41,6 +42,11 @@ const navigationItems = [
     title: "Orders",
     url: "/admin/orders", 
     icon: ShoppingCart,
+  },
+  {
+    title: "Redeemed Codes",
+    url: "/admin/redeemed-codes",
+    icon: Ticket,
   },
   {
     title: "Audit Logs",

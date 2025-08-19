@@ -11,6 +11,7 @@ import { UsersPage } from "./pages/admin/UsersPage";
 import { ProductsPage } from "./pages/admin/ProductsPage";
 import { OrdersPage } from "./pages/admin/OrdersPage";
 import { AuditLogsPage } from "./pages/admin/AuditLogsPage";
+import { RedeemedCodesPage } from "./pages/admin/RedeemedCodesPage";
 import SettingsPage from "./pages/admin/SettingsPage";
 import RequireAdmin from "./components/auth/RequireAdmin";
 
@@ -61,6 +62,16 @@ const App = () => (
                 <RequireAdmin>
                   <AdminLayout breadcrumbs={[{ label: "Orders" }]}>
                     <OrdersPage />
+                  </AdminLayout>
+                </RequireAdmin>
+              }
+            />
+            <Route
+              path="/admin/redeemed-codes"
+              element={
+                <RequireAdmin>
+                  <AdminLayout breadcrumbs={[{ label: "Redeemed Codes" }]}>
+                    <RedeemedCodesPage />
                   </AdminLayout>
                 </RequireAdmin>
               }
