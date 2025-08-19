@@ -218,44 +218,6 @@ export function SettingsPage() {
           </CardContent>
         </Card>
 
-        {/* Interface Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Palette className="h-5 w-5" />
-              Interface Preferences
-            </CardTitle>
-            <CardDescription>
-              Customize the admin dashboard appearance
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="theme">Theme</Label>
-                <select id="theme" className="w-full p-2 border rounded-md">
-                  <option value="light">Light</option>
-                  <option value="dark">Dark</option>
-                  <option value="auto">Auto</option>
-                </select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="items-per-page">Items Per Page</Label>
-                <Input id="items-per-page" type="number" defaultValue="50" />
-              </div>
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label className="text-base">Compact Mode</Label>
-                <p className="text-sm text-muted-foreground">
-                  Use compact layout for tables and lists
-                </p>
-              </div>
-              <Switch />
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Save Settings */}
         <div className="flex justify-end">
