@@ -351,15 +351,6 @@ export function RedeemedCodesPage() {
 
               <div>
                 <Label className="text-sm font-medium text-muted-foreground">
-                  API Response
-                </Label>
-                <pre className="mt-1 text-xs p-3 bg-muted rounded-lg overflow-auto max-h-64">
-                  {JSON.stringify(selectedRedemption.api_response, null, 2)}
-                </pre>
-              </div>
-
-              <div>
-                <Label className="text-sm font-medium text-muted-foreground">
                   User ID
                 </Label>
                 <p className="mt-1 text-sm font-mono">
