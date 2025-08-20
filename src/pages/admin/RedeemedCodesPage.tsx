@@ -16,15 +16,18 @@ export function RedeemedCodesPage() {
   const [selectedRedemption, setSelectedRedemption] = useState<any>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
 
-  // Redeemed codes data with user profiles
+  // Redeemed codes data with user profiles and validation attempts
   const { data: redeemedCodes, refetch: refetchRedeemedCodes } = useQuery({
     queryKey: ["admin-redeemed-codes", searchTerm],
     queryFn: async () => {
       if (!searchTerm) {
-        // No search term - get all recent codes
+        // No search term - get all recent codes with validation attempts
         const { data: codes, error: codesError } = await supabase
           .from("redeemed_codes")
-          .select("*")
+          .select(`
+            *,
+            code_validation_attempts!left(status, error_message)
+          `)
           .order("created_at", { ascending: false })
           .limit(100);
 
@@ -51,7 +54,10 @@ export function RedeemedCodesPage() {
         // Search codes by code value
         supabase
           .from("redeemed_codes")
-          .select("*")
+          .select(`
+            *,
+            code_validation_attempts!left(status, error_message)
+          `)
           .ilike("code", `%${searchTerm}%`)
           .order("created_at", { ascending: false })
           .limit(50),
@@ -74,7 +80,10 @@ export function RedeemedCodesPage() {
         const userIds = foundProfiles.map(p => p.id);
         const { data: additionalCodes, error: userCodesError } = await supabase
           .from("redeemed_codes")
-          .select("*")
+          .select(`
+            *,
+            code_validation_attempts!left(status, error_message)
+          `)
           .in("user_id", userIds)
           .order("created_at", { ascending: false })
           .limit(50);
@@ -115,18 +124,35 @@ export function RedeemedCodesPage() {
     setDetailModalOpen(true);
   };
 
-  const getStatusBadge = (apiResponse: any) => {
+  const getStatusBadge = (redemption: any) => {
+    // Use validation attempt status if available
+    if (redemption.code_validation_attempts?.status) {
+      const status = redemption.code_validation_attempts.status;
+      switch (status) {
+        case 'valid':
+          return <Badge variant="default">Successfully Redeemed</Badge>;
+        case 'invalid':
+          return <Badge variant="destructive">Invalid Code</Badge>;
+        case 'already_redeemed':
+          return <Badge variant="destructive">Already Redeemed</Badge>;
+        case 'error':
+          return <Badge variant="secondary">Validation Error</Badge>;
+        default:
+          return <Badge variant="secondary">Unknown Status</Badge>;
+      }
+    }
+    
+    // Fallback to API response for legacy entries
+    const apiResponse = redemption.api_response;
     if (!apiResponse) return <Badge variant="secondary">Unknown</Badge>;
     
-    const isValid = apiResponse.valid === true;
-    const isUsed = apiResponse.used === true;
+    // Fix the data access path
+    const isValid = apiResponse.data?.valid === true;
     
-    if (isValid && !isUsed) {
-      return <Badge variant="default">Valid & Redeemed</Badge>;
-    } else if (isValid && isUsed) {
-      return <Badge variant="destructive">Already Used</Badge>;
+    if (isValid) {
+      return <Badge variant="default">Successfully Redeemed</Badge>;
     } else {
-      return <Badge variant="destructive">Invalid</Badge>;
+      return <Badge variant="destructive">Invalid Code</Badge>;
     }
   };
 
@@ -186,7 +212,7 @@ export function RedeemedCodesPage() {
                       <Badge variant="outline" className="mb-2">
                         {formatPoints(redemption.points_awarded)}
                       </Badge>
-                      <div>{getStatusBadge(redemption.api_response)}</div>
+                      <div>{getStatusBadge(redemption)}</div>
                     </div>
                   </div>
                   
@@ -243,7 +269,7 @@ export function RedeemedCodesPage() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {getStatusBadge(redemption.api_response)}
+                      {getStatusBadge(redemption)}
                     </TableCell>
                     <TableCell>
                       <div className="text-sm">
@@ -319,7 +345,7 @@ export function RedeemedCodesPage() {
                   Validation Status
                 </Label>
                 <div className="mt-1">
-                  {getStatusBadge(selectedRedemption.api_response)}
+                  {getStatusBadge(selectedRedemption)}
                 </div>
               </div>
 
