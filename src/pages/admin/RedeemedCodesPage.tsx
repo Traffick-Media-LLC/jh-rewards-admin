@@ -9,16 +9,18 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Search, RefreshCw, Eye, Ticket } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { formatPoints } from "@/lib/pricing";
 
 export function RedeemedCodesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRedemption, setSelectedRedemption] = useState<any>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   // Redeemed codes data with user profiles and validation attempts
   const { data: redeemedCodes, refetch: refetchRedeemedCodes } = useQuery({
-    queryKey: ["admin-redeemed-codes", searchTerm],
+    queryKey: ["admin-redeemed-codes", searchTerm, statusFilter],
     queryFn: async () => {
       if (!searchTerm) {
         // No search term - get all recent codes with validation attempts
@@ -156,6 +158,28 @@ export function RedeemedCodesPage() {
     }
   };
 
+  const isSuccessful = (redemption: any) => {
+    if (redemption.code_validation_attempts?.status) {
+      return redemption.code_validation_attempts.status === 'valid';
+    }
+    return redemption.api_response?.data?.valid === true;
+  };
+
+  const isInvalid = (redemption: any) => {
+    if (redemption.code_validation_attempts?.status) {
+      const status = redemption.code_validation_attempts.status;
+      return status === 'invalid' || status === 'already_redeemed' || status === 'error';
+    }
+    return redemption.api_response?.data?.valid !== true;
+  };
+
+  const matchesFilter = (redemption: any) => {
+    if (statusFilter === 'all') return true;
+    if (statusFilter === 'successful') return isSuccessful(redemption);
+    if (statusFilter === 'invalid') return isInvalid(redemption);
+    return true;
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -185,12 +209,36 @@ export function RedeemedCodesPage() {
                 className="pl-10"
               />
             </div>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="status-filter" className="text-sm font-medium whitespace-nowrap">
+                Filter by status:
+              </Label>
+              <RadioGroup
+                value={statusFilter}
+                onValueChange={setStatusFilter}
+                className="flex flex-row gap-4"
+                id="status-filter"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="all" id="all" />
+                  <Label htmlFor="all" className="text-sm">All</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="successful" id="successful" />
+                  <Label htmlFor="successful" className="text-sm">Successful</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="invalid" id="invalid" />
+                  <Label htmlFor="invalid" className="text-sm">Invalid</Label>
+                </div>
+              </RadioGroup>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
           {/* Mobile view: Card layout */}
           <div className="block sm:hidden space-y-4">
-            {redeemedCodes?.map((redemption) => (
+            {redeemedCodes?.filter(matchesFilter).map((redemption) => (
               <Card key={redemption.id} className="p-4">
                 <div className="space-y-3">
                   <div className="flex items-start justify-between">
@@ -246,7 +294,7 @@ export function RedeemedCodesPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {redeemedCodes?.map((redemption) => (
+                {redeemedCodes?.filter(matchesFilter).map((redemption) => (
                   <TableRow key={redemption.id}>
                     <TableCell>
                       <code className="font-mono text-sm bg-muted px-2 py-1 rounded">
